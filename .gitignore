@@ -1,0 +1,11 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+inst/doc
+.httr-oauth
+.DS_Store
+.quarto
+src/Makevars
+figure/
+cran-comments.md
