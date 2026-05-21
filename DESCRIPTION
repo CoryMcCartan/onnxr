@@ -3,29 +3,27 @@ Type: Package
 Title: Native R 'ONNX' Runtime
 Version: 1.0.1
 Authors@R: c(
-    person(
-      "Caleb", "Carr",
-      email = "calebmcarr1@gmail.com",
-      role = c("aut", "cre")
-    )
+    person("Caleb", "Carr", email = "calebmcarr1@gmail.com", role = c("aut", "cre"))
   )
 Description: Provides R native 'ONNX' model inference without requiring 'Python', 'reticulate' bindings, or 'TensorFlow'. This package directly binds the 'ONNX Runtime' C API via 'Rcpp', enabling real-time inference for '.onnx' engines, all within R. Standard CPU execution is supported as well as the 'CoreML' Execution Provider (CEP) for Apple Silicon, all without external bindings. This package handles OS detection, linking 'ONNX' libraries, and inference. For more information about 'ONNX Runtime' see <https://onnxruntime.ai/>.
 License: MIT + file LICENSE
-Language: en-US
-Encoding: UTF-8
-LazyData: true
-LinkingTo: 
-    Rcpp
-Imports: 
-    Rcpp,
+LinkingTo:
+    cpp11
+Imports:
     digest,
     glue
-Config/roxygen2/version: 8.0.0
-SystemRequirements: libonnxruntime (>= 1.20)
-Suggests: 
+Suggests:
     ggplot2,
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
+Language: en-US
+Encoding: UTF-8
+SystemRequirements: libonnxruntime (>= 1.20)
+Config/roxygen2/version: 8.0.0
+Config/testthat/edition: 3
+Config/build/compilation-database: true
 VignetteBuilder: knitr
 URL: https://github.com/calebmcarr/nativeORT
 BugReports: https://github.com/calebmcarr/nativeORT/issues
+RoxygenNote: 7.3.3

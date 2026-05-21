@@ -1,24 +1,32 @@
-#include <Rcpp.h>
+#include <cpp11.hpp>
+#include <string>
+#include <vector>
+#include <unordered_map>
 
 #ifdef HAVE_ORT
 #include <onnxruntime_cxx_api.h>
+#endif
 
-// [[Rcpp::export]]
+[[cpp11::register]]
 SEXP ort_create_env() {
+#ifdef HAVE_ORT
   Ort::Env* env = new Ort::Env(ORT_LOGGING_LEVEL_WARNING, "nativeORT");
-  Rcpp::XPtr<Ort::Env> ptr(env, true);
-  return ptr;
+  return cpp11::external_pointer<Ort::Env>(env);
+#else
+  cpp11::stop("ORT not installed. Run ort_install() then reinstall nativeORT.");
+#endif
 }
 
-// [[Rcpp::export]]
+[[cpp11::register]]
 SEXP ort_create_session(SEXP env_ptr,
                         std::string model_path,
-                        std::string provider = "cpu",
-                        std::string cache_dir = "",
-                        int threads = 0,
-                        int opt_level=99)
+                        std::string provider,
+                        std::string cache_dir,
+                        int threads,
+                        int opt_level)
 {
-  Rcpp::XPtr<Ort::Env> env(env_ptr);
+#ifdef HAVE_ORT
+  cpp11::external_pointer<Ort::Env> env(env_ptr);
   Ort::SessionOptions session_options;
 
   if (threads > 0){
@@ -34,7 +42,6 @@ SEXP ort_create_session(SEXP env_ptr,
   }
   session_options.SetGraphOptimizationLevel(ort_opt);
 
-  // add in CoreML options for apple silicon users
   if (provider == "coreml") {
     std::unordered_map<std::string, std::string> options;
     options["ModelFormat"] = "MLProgram";
@@ -46,7 +53,7 @@ SEXP ort_create_session(SEXP env_ptr,
 
     session_options.AppendExecutionProvider("CoreML", options);
   } else if (provider != "cpu") {
-    Rcpp::warning("Unknown provider/Unsupported GPU support. Falling back to CPU");
+    cpp11::warning("Unknown provider/Unsupported GPU support. Falling back to CPU");
   }
 
   Ort::Session* session = new Ort::Session(
@@ -55,29 +62,40 @@ SEXP ort_create_session(SEXP env_ptr,
     session_options
   );
 
-  Rcpp::XPtr<Ort::Session> ptr(session, true);
-  return ptr;
+  return cpp11::external_pointer<Ort::Session>(session);
+#else
+  cpp11::stop("ORT not installed. Run ort_install() then reinstall nativeORT.");
+#endif
 }
 
-// [[Rcpp::export]]
+[[cpp11::register]]
 int ort_session_input_count(SEXP session_ptr) {
-  Rcpp::XPtr<Ort::Session> session(session_ptr);
+#ifdef HAVE_ORT
+  cpp11::external_pointer<Ort::Session> session(session_ptr);
   return session->GetInputCount();
+#else
+  cpp11::stop("ORT not installed. Run ort_install() then reinstall nativeORT.");
+#endif
 }
 
-// [[Rcpp::export]]
+[[cpp11::register]]
 int ort_session_output_count(SEXP session_ptr) {
-  Rcpp::XPtr<Ort::Session> session(session_ptr);
+#ifdef HAVE_ORT
+  cpp11::external_pointer<Ort::Session> session(session_ptr);
   return session->GetOutputCount();
+#else
+  cpp11::stop("ORT not installed. Run ort_install() then reinstall nativeORT.");
+#endif
 }
 
-// [[Rcpp::export]]
-std::vector<std::string> ort_session_input_names(SEXP session_ptr) {
-  Rcpp::XPtr<Ort::Session> session(session_ptr);
+[[cpp11::register]]
+cpp11::writable::strings ort_session_input_names(SEXP session_ptr) {
+#ifdef HAVE_ORT
+  cpp11::external_pointer<Ort::Session> session(session_ptr);
   Ort::AllocatorWithDefaultOptions allocator;
 
   size_t count = session->GetInputCount();
-  std::vector<std::string> names;
+  cpp11::writable::strings names;
   names.reserve(count);
 
   for (size_t i = 0; i < count; i++) {
@@ -86,15 +104,19 @@ std::vector<std::string> ort_session_input_names(SEXP session_ptr) {
   }
 
   return names;
+#else
+  cpp11::stop("ORT not installed. Run ort_install() then reinstall nativeORT.");
+#endif
 }
 
-// [[Rcpp::export]]
-std::vector<std::string> ort_session_output_names(SEXP session_ptr) {
-  Rcpp::XPtr<Ort::Session> session(session_ptr);
+[[cpp11::register]]
+cpp11::writable::strings ort_session_output_names(SEXP session_ptr) {
+#ifdef HAVE_ORT
+  cpp11::external_pointer<Ort::Session> session(session_ptr);
   Ort::AllocatorWithDefaultOptions allocator;
 
   size_t count = session->GetOutputCount();
-  std::vector<std::string> names;
+  cpp11::writable::strings names;
   names.reserve(count);
 
   for (size_t i = 0; i < count; i++) {
@@ -102,37 +124,7 @@ std::vector<std::string> ort_session_output_names(SEXP session_ptr) {
     names.push_back(std::string(name.get()));
   }
   return names;
-}
-
 #else
-
-SEXP ort_create_env() {
-  Rcpp::stop("ORT not installed. Run ort_install() then reinstall nativeORT.");
-}
-
-SEXP ort_create_session(SEXP env_ptr,
-                        std::string model_path,
-                        std::string provider = "cpu",
-                        std::string cache_dir = "",
-                        int threads = 0,
-                        int opt_level=99) {
-  Rcpp::stop("ORT not installed. Run ort_install() then reinstall nativeORT.");
-}
-
-int ort_session_input_count(SEXP session_ptr) {
-  Rcpp::stop("ORT not installed. Run ort_install() then reinstall nativeORT.");
-}
-
-int ort_session_output_count(SEXP session_ptr) {
-  Rcpp::stop("ORT not installed. Run ort_install() then reinstall nativeORT.");
-}
-
-std::vector<std::string> ort_session_input_names(SEXP session_ptr) {
-  Rcpp::stop("ORT not installed. Run ort_install() then reinstall nativeORT.");
-}
-
-std::vector<std::string> ort_session_output_names(SEXP session_ptr) {
-  Rcpp::stop("ORT not installed. Run ort_install() then reinstall nativeORT.");
-}
-
+  cpp11::stop("ORT not installed. Run ort_install() then reinstall nativeORT.");
 #endif
+}
