@@ -64,11 +64,11 @@ test_that("logistic regression probabilities match glm()", {
     input_mat <- as.matrix(iris_sub[, 1:4])
     result <- onnx_run(sess, input_mat)
 
-    # col 2 = P(virginica)
-    onnx_p1 <- result$probabilities[, 2]
+    # Single output: P(virginica) via sigmoid
+    expect_type(result, "double")
 
     # Wider tolerance: sklearn L-BFGS vs R IRLS may differ slightly
-    expect_equal(as.numeric(onnx_p1), r_probs, tolerance = 1e-3)
+    expect_equal(as.numeric(result), r_probs, tolerance = 1e-3)
 })
 
 test_that("input validation catches wrong dimensions", {

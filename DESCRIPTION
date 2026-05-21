@@ -23,6 +23,7 @@ Suggests:
     jpeg,
     knitr,
     rmarkdown,
+    stablehlo,
     testthat (>= 3.0.0)
 URL: https://corymccartan.com/onnxr, https://github.com/CoryMcCartan/onnxr
 BugReports: https://github.com/CoryMcCartan/onnxr/issues

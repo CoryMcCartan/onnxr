@@ -62,7 +62,68 @@ with open(path_glm, "wb") as f:
 print(f"Wrote {path_glm}")
 
 # --------------------------------------------------------------------------
-# Verify models load and run in onnxruntime
+# Model 3: Linear regression using standard ONNX ops (MatMul + Add)
+# Same coefficients as Model 1 but uses standard ops for HLO conversion
+# --------------------------------------------------------------------------
+import onnx
+from onnx import helper, TensorProto as TP
+
+# Extract fitted coefficients
+coef = lr.coef_.astype(np.float32).reshape(-1, 1)  # [3, 1]
+intercept = lr.intercept_.astype(np.float32).reshape(1)  # [1]
+
+lm_graph = helper.make_graph(
+    [
+        helper.make_node("MatMul", ["X", "coef"], ["matmul_out"]),
+        helper.make_node("Add", ["matmul_out", "intercept"], ["variable"]),
+    ],
+    "lm_iris_standard",
+    [helper.make_tensor_value_info("X", TP.FLOAT, [None, 3])],
+    [helper.make_tensor_value_info("variable", TP.FLOAT, [None, 1])],
+    [
+        helper.make_tensor("coef", TP.FLOAT, coef.shape, coef.flatten()),
+        helper.make_tensor("intercept", TP.FLOAT, intercept.shape, intercept.flatten()),
+    ],
+)
+lm_model = helper.make_model(lm_graph, opset_imports=[helper.make_opsetid("", 17)])
+lm_model.ir_version = 8
+onnx.checker.check_model(lm_model)
+
+path_lm_std = os.path.join(OUTDIR, "lm_iris.onnx")
+onnx.save(lm_model, path_lm_std)
+print(f"Wrote {path_lm_std} (standard ops)")
+
+# --------------------------------------------------------------------------
+# Model 4: Logistic regression using standard ONNX ops
+# MatMul + Add + Sigmoid for binary classification
+# --------------------------------------------------------------------------
+glm_coef = glm.coef_.astype(np.float32).reshape(-1, 1)  # [4, 1]
+glm_intercept = glm.intercept_.astype(np.float32).reshape(1)  # [1]
+
+glm_graph = helper.make_graph(
+    [
+        helper.make_node("MatMul", ["X", "coef"], ["matmul_out"]),
+        helper.make_node("Add", ["matmul_out", "intercept"], ["logit"]),
+        helper.make_node("Sigmoid", ["logit"], ["prob_1"]),
+    ],
+    "glm_iris_standard",
+    [helper.make_tensor_value_info("X", TP.FLOAT, [None, 4])],
+    [helper.make_tensor_value_info("prob_1", TP.FLOAT, [None, 1])],
+    [
+        helper.make_tensor("coef", TP.FLOAT, glm_coef.shape, glm_coef.flatten()),
+        helper.make_tensor("intercept", TP.FLOAT, glm_intercept.shape, glm_intercept.flatten()),
+    ],
+)
+glm_model = helper.make_model(glm_graph, opset_imports=[helper.make_opsetid("", 17)])
+glm_model.ir_version = 8
+onnx.checker.check_model(glm_model)
+
+path_glm_std = os.path.join(OUTDIR, "glm_iris.onnx")
+onnx.save(glm_model, path_glm_std)
+print(f"Wrote {path_glm_std} (standard ops)")
+
+# --------------------------------------------------------------------------
+# Verify all models load and run in onnxruntime
 # --------------------------------------------------------------------------
 import onnxruntime as ort
 
