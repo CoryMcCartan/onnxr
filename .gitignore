@@ -13,3 +13,4 @@ docs/
 compile_commands.json
 .claude/
 vignettes/*_files/
+docs

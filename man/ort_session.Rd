@@ -7,8 +7,8 @@
 ort_session(
   path,
   provider = c("cpu", "coreml", "cuda", "xnnpack", "openvino"),
-  cache_dir = NULL,
-  threads = 0L,
+  cache_dir = tools::R_user_dir("nativeORT", "cache"),
+  threads = 1L,
   opt_level = 99L
 )
 }
@@ -25,9 +25,9 @@ platform and ORT build:
 \item \code{"openvino"} — Intel hardware acceleration.
 }}
 
-\item{cache_dir}{Optional directory for CoreML model cache.}
+\item{cache_dir}{Optional directory for CoreML model cache. Set to \code{NULL} to disable caching.}
 
-\item{threads}{Number of threads. \code{0} (default) uses all available;
+\item{threads}{Number of threads. \code{0} uses all available;
 a positive integer sets a fixed thread count.}
 
 \item{opt_level}{Graph optimization level. \code{99} (default) enables all

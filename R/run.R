@@ -9,11 +9,16 @@
 #' declared element types (float, double, int32, int64).
 #'
 #' @param session An `"ort_session"` object created by [ort_session()].
-#' @param input A numeric matrix or array to use as model input.
-#'   Must have a `dim` attribute matching the model's expected input shape.
+#' @param ... Input arrays, either as unnamed arguments (matched to model
+#'   inputs by position) or as named arguments (matched by name). Each
+#'   input must be a numeric or integer matrix/array with dimensions
+#'   matching the model's expected input shape. For single-input models,
+#'   a single array can be passed directly.
+#' @param simplify If `TRUE`, return the output array directly for
+#'   single-output models instead of a length-1 named list.
 #'
-#' @returns A numeric or integer array (single-output models), or a named
-#'   list of arrays (multi-output models).
+#' @returns A named list of output arrays, or (if `simplify = TRUE` and
+#'   the model has a single output) the output array directly.
 #' @export
 #'
 #' @examples \donttest{
@@ -24,42 +29,72 @@
 #'     ort_run(sess, input)
 #' }
 #' }
-ort_run <- function(session, input) {
-    d <- dim(input)
-    expected <- session$input_shapes[[1L]]
+ort_run <- function(session, ..., simplify = FALSE) {
+    args <- list(...)
 
-    # Validate number of dimensions
-    if (length(d) != length(expected)) {
-        stop(sprintf(
-            "Input has %d dimensions but model expects %d.",
-            length(d), length(expected)
-        ))
+    # Match inputs to model input names
+    if (length(args) == 1L && is.null(names(args))) {
+        # Single unnamed input → first model input
+        input_list <- args
+        input_order <- 1L
+    } else if (!is.null(names(args)) && all(nzchar(names(args)))) {
+        # All named → match by name
+        input_order <- match(names(args), session$input_names)
+        if (anyNA(input_order)) {
+            bad <- names(args)[is.na(input_order)]
+            stop("Unknown input name(s): ", paste(bad, collapse = ", "),
+                ". Model inputs: ", paste(session$input_names, collapse = ", "))
+        }
+        input_list <- args
+    } else {
+        # Positional
+        if (length(args) != session$n_inputs) {
+            stop(sprintf("Model has %d input(s) but %d provided.",
+                session$n_inputs, length(args)))
+        }
+        input_list <- args
+        input_order <- seq_len(session$n_inputs)
     }
-    # Validate non-batch dimensions (those != -1 in declared shape)
-    for (i in seq_along(expected)) {
-        if (expected[i] > 0L && d[i] != expected[i]) {
-            stop(sprintf(
-                "Input dimension %d is %d but model expects %d.",
-                i, d[i], expected[i]
-            ))
+
+    # Validate each input's dimensions
+    for (j in seq_along(input_list)) {
+        i <- input_order[j]
+        d <- dim(input_list[[j]])
+        expected <- session$input_shapes[[i]]
+        if (is.null(d)) {
+            stop(sprintf("Input '%s' must have a dim attribute (use matrix or array).",
+                session$input_names[i]))
+        }
+        if (length(d) != length(expected)) {
+            stop(sprintf("Input '%s' has %d dimensions but model expects %d.",
+                session$input_names[i], length(d), length(expected)))
+        }
+        for (k in seq_along(expected)) {
+            if (expected[k] > 0L && d[k] != expected[k]) {
+                stop(sprintf("Input '%s' dimension %d is %d but model expects %d.",
+                    session$input_names[i], k, d[k], expected[k]))
+            }
         }
     }
 
-    input_vec <- as.numeric(input)
-    input_shp <- as.integer(d)
-    input_nm <- session$input_names[1L]
+    # Build lists for C++
+    input_shapes <- lapply(input_list, function(x) as.integer(dim(x)))
+    input_types <- session$input_types[input_order]
+    input_nms <- session$input_names[input_order]
 
-    outputs <- lapply(seq_len(session$n_outputs), function(i) {
-        ort_run_(
-            session_ptr = session$ptr,
-            input_array = input_vec,
-            input_shape = input_shp,
-            input_name = input_nm,
-            output_name = session$output_names[i],
-            output_type = session$output_types[i]
-        )
-    })
-    names(outputs) <- session$output_names
+    results <- ort_run_(
+        session_ptr = session$ptr,
+        inputs = input_list,
+        input_shapes = input_shapes,
+        input_names = input_nms,
+        input_types = input_types,
+        output_names = session$output_names
+    )
+    names(results) <- session$output_names
 
-    if (length(outputs) == 1L) outputs[[1L]] else outputs
+    if (isTRUE(simplify) && length(results) == 1L) {
+        results[[1L]]
+    } else {
+        results
+    }
 }

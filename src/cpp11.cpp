@@ -6,10 +6,10 @@
 #include <R_ext/Visibility.h>
 
 // inference.cpp
-SEXP ort_run_(SEXP session_ptr, cpp11::doubles input_array, cpp11::integers input_shape, std::string input_name, std::string output_name, int output_type);
-extern "C" SEXP _nativeORT_ort_run_(SEXP session_ptr, SEXP input_array, SEXP input_shape, SEXP input_name, SEXP output_name, SEXP output_type) {
+cpp11::writable::list ort_run_(SEXP session_ptr, cpp11::list inputs, cpp11::list input_shapes, cpp11::strings input_names, cpp11::integers input_types, cpp11::strings output_names);
+extern "C" SEXP _nativeORT_ort_run_(SEXP session_ptr, SEXP inputs, SEXP input_shapes, SEXP input_names, SEXP input_types, SEXP output_names) {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_run_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::doubles>>(input_array), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(input_shape), cpp11::as_cpp<cpp11::decay_t<std::string>>(input_name), cpp11::as_cpp<cpp11::decay_t<std::string>>(output_name), cpp11::as_cpp<cpp11::decay_t<int>>(output_type)));
+    return cpp11::as_sexp(ort_run_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(inputs), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(input_shapes), cpp11::as_cpp<cpp11::decay_t<cpp11::strings>>(input_names), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(input_types), cpp11::as_cpp<cpp11::decay_t<cpp11::strings>>(output_names)));
   END_CPP11
 }
 // nativeORT.cpp

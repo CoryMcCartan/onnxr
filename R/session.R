@@ -10,8 +10,8 @@
 #'   - `"cuda"` — NVIDIA GPU (requires CUDA-enabled ORT build).
 #'   - `"xnnpack"` — Optimized CPU kernels (mobile/embedded).
 #'   - `"openvino"` — Intel hardware acceleration.
-#' @param cache_dir Optional directory for CoreML model cache.
-#' @param threads Number of threads. `0` (default) uses all available;
+#' @param cache_dir Optional directory for CoreML model cache. Set to `NULL` to disable caching.
+#' @param threads Number of threads. `0` uses all available;
 #'   a positive integer sets a fixed thread count.
 #' @param opt_level Graph optimization level. `99` (default) enables all
 #'   optimizations; `1` for basic only; `0` to disable.
@@ -30,8 +30,8 @@
 ort_session <- function(
     path,
     provider = c("cpu", "coreml", "cuda", "xnnpack", "openvino"),
-    cache_dir = NULL,
-    threads = 0L,
+    cache_dir = tools::R_user_dir("nativeORT", "cache"),
+    threads = 1L,
     opt_level = 99L
 ) {
     provider <- match.arg(provider)
@@ -51,10 +51,28 @@ ort_session <- function(
         ""
     }
 
+    model_path <- normalizePath(path)
+
+    # Non-CPU providers (especially CoreML) cannot resolve external data
+    # files (.onnx_data) referenced by the model. Detect and warn.
+    if (provider != "cpu") {
+        model_dir <- dirname(model_path)
+        data_files <- list.files(model_dir, pattern = "[.]onnx_data$",
+            full.names = TRUE)
+        if (length(data_files) > 0) {
+            stop(
+                "Models with external data (.onnx_data) are not supported ",
+                "with the '", provider, "' provider due to an ONNX Runtime ",
+                "limitation. Use provider='cpu', or convert the model to ",
+                "embed its data (e.g., with onnx.save() in Python)."
+            )
+        }
+    }
+
     env <- ort_create_env()
     sess <- ort_create_session(
         env_ptr = env,
-        model_path = normalizePath(path),
+        model_path = model_path,
         provider = provider,
         cache_dir = cache,
         threads = as.integer(threads),
@@ -91,13 +109,27 @@ ort_session <- function(
 
 # Map ORT element type codes to human-readable names
 .ort_type_names <- c(
-    "undefined", "float", "uint8", "int8", "uint16", "int16",
-    "int32", "int64", "string", "bool", "float16", "double",
-    "uint32", "uint64"
+    "undefined",
+    "float",
+    "uint8",
+    "int8",
+    "uint16",
+    "int16",
+    "int32",
+    "int64",
+    "string",
+    "bool",
+    "float16",
+    "double",
+    "uint32",
+    "uint64"
 )
 .ort_type_name <- function(code) {
-    ifelse(code >= 0L & code < length(.ort_type_names),
-        .ort_type_names[code + 1L], paste0("type(", code, ")"))
+    ifelse(
+        code >= 0L & code < length(.ort_type_names),
+        .ort_type_names[code + 1L],
+        paste0("type(", code, ")")
+    )
 }
 
 # Format a shape vector as a string, e.g. "[?, 3]"
@@ -111,19 +143,22 @@ ort_session <- function(
 print.ort_session <- function(x, ...) {
     cat("nativeORT session\n")
     cat("  model:  ", x$path, "\n")
-    cat("  provider:", x$provider,
-        " threads:", ifelse(x$threads == 0, "auto", x$threads), "\n")
+    cat("  provider:", x$provider, " threads:", ifelse(x$threads == 0, "auto", x$threads), "\n")
     for (i in seq_len(x$n_inputs)) {
-        cat(sprintf("  input:  %s %s <%s>\n",
+        cat(sprintf(
+            "  input:  %s %s <%s>\n",
             x$input_names[i],
             .fmt_shape(x$input_shapes[[i]]),
-            .ort_type_name(x$input_types[i])))
+            .ort_type_name(x$input_types[i])
+        ))
     }
     for (i in seq_len(x$n_outputs)) {
-        cat(sprintf("  output: %s %s <%s>\n",
+        cat(sprintf(
+            "  output: %s %s <%s>\n",
             x$output_names[i],
             .fmt_shape(x$output_shapes[[i]]),
-            .ort_type_name(x$output_types[i])))
+            .ort_type_name(x$output_types[i])
+        ))
     }
     invisible(x)
 }

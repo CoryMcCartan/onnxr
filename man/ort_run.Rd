@@ -4,17 +4,23 @@
 \alias{ort_run}
 \title{Run inference on an ONNX model}
 \usage{
-ort_run(session, input)
+ort_run(session, ..., simplify = FALSE)
 }
 \arguments{
 \item{session}{An \code{"ort_session"} object created by \code{\link[=ort_session]{ort_session()}}.}
 
-\item{input}{A numeric matrix or array to use as model input.
-Must have a \code{dim} attribute matching the model's expected input shape.}
+\item{...}{Input arrays, either as unnamed arguments (matched to model
+inputs by position) or as named arguments (matched by name). Each
+input must be a numeric or integer matrix/array with dimensions
+matching the model's expected input shape. For single-input models,
+a single array can be passed directly.}
+
+\item{simplify}{If \code{TRUE}, return the output array directly for
+single-output models instead of a length-1 named list.}
 }
 \value{
-A numeric or integer array (single-output models), or a named
-list of arrays (multi-output models).
+A named list of output arrays, or (if \code{simplify = TRUE} and
+the model has a single output) the output array directly.
 }
 \description{
 Passes \code{input} through the model and returns the results. For models

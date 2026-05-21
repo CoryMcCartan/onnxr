@@ -52,7 +52,7 @@ types = c(
 )
 ```
 
-Now we are ready to load an image and run the model on it.
+Now we are ready to load an image (Vermeer's [*The Milkmaid*](https://en.wikipedia.org/wiki/The_Milkmaid_(Vermeer))) and run the model on it.
 
 ```{r load}
 # load image from URL and center in 640x640 array
@@ -97,8 +97,8 @@ for (j in idx_conf) {
     y1 = 1 - res[1, j, 2] / 640
     x2 = res[1, j, 3] / 640
     y2 = 1 - res[1, j, 4] / 640
-    rect(x1, y1, x2, y2, border = "#a00", lwd = 1)
+    rect(x1, y1, x2, y2, border = "#e00", lwd = 1)
     lbl = paste0(types[res[1, j, 6] + 1], " (", round(res[1, j, 5] * 100), "%)")
-    text(x1, y1, lbl, adj = c(0, -0.5), cex = 0.6, col = "#a00")
+    text(x1, y1, lbl, adj = c(0, -0.5), cex = 0.8, col = "#800", font = 2)
 }
 ```

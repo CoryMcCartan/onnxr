@@ -60,31 +60,47 @@ ort_find_lib <- function() {
 
     # 3. Package's R_user_dir (from ort_install())
     pkg_path <- file.path(ort_install_dir(), "lib", lib_name)
-    if (file.exists(pkg_path)) return(normalizePath(pkg_path))
+    if (file.exists(pkg_path)) {
+        return(normalizePath(pkg_path))
+    }
 
     # 4. Python onnxruntime package
     python <- Sys.which("python3")
-    if (!nzchar(python)) python <- Sys.which("python")
+    if (!nzchar(python)) {
+        python <- Sys.which("python")
+    }
     if (nzchar(python)) {
+        # fmt: skip
         py_path <- tryCatch({
-            out <- system2(python, c("-c",
-                shQuote("import onnxruntime, os; print(os.path.dirname(onnxruntime.__file__))")),
-                stdout = TRUE, stderr = FALSE)
+            out <- system2(
+                python,
+                c("-c", shQuote("import onnxruntime, os; print(os.path.dirname(onnxruntime.__file__))")),
+                stdout = TRUE,
+                stderr = FALSE
+            )
             if (length(out) == 1 && nzchar(out)) {
                 capi_path <- file.path(out, "capi", lib_name)
                 if (file.exists(capi_path)) capi_path else NULL
             }
         }, error = function(e) NULL, warning = function(w) NULL)
-        if (!is.null(py_path)) return(normalizePath(py_path))
+        if (!is.null(py_path)) {
+            return(normalizePath(py_path))
+        }
     }
 
     # 5. pkg-config
     pkgconf <- Sys.which("pkg-config")
     if (nzchar(pkgconf)) {
-        pc_out <- tryCatch({
-            system2("pkg-config", c("--libs-only-L", "onnxruntime"),
-                stdout = TRUE, stderr = FALSE)
-        }, error = function(e) NULL, warning = function(w) NULL)
+        pc_out <- tryCatch(
+            system2(
+                "pkg-config",
+                c("--libs-only-L", "onnxruntime"),
+                stdout = TRUE,
+                stderr = FALSE
+            ),
+            error = function(e) NULL,
+            warning = function(w) NULL
+        )
         if (!is.null(pc_out) && length(pc_out) == 1 && nzchar(pc_out)) {
             lib_dir <- sub("^-L", "", trimws(pc_out))
             path <- file.path(lib_dir, lib_name)
@@ -168,9 +184,12 @@ ort_detect_os <- function() {
 # Platform-specific shared library filename.
 .ort_lib_name <- function() {
     os <- ort_detect_os()
-    switch(os,
-        "osx-arm64" = , "osx-x86_64" = "libonnxruntime.dylib",
-        "linux-x64" = , "linux-aarch64" = "libonnxruntime.so",
+    switch(
+        os,
+        "osx-arm64" = ,
+        "osx-x86_64" = "libonnxruntime.dylib",
+        "linux-x64" = ,
+        "linux-aarch64" = "libonnxruntime.so",
         "win-x64" = "onnxruntime.dll"
     )
 }

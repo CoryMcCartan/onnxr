@@ -1,0 +1,17 @@
+url: ~
+template:
+  bootstrap: 5
+
+
+reference:
+- title: Load and run a model
+  contents:
+  - ort_session
+  - ort_run
+
+- title: Manage the ONNX runtime
+  contents:
+  - ort_install
+  - ort_find_lib
+  - ort_is_installed
+  - ort_is_loaded

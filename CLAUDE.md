@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Package Overview
 
-nativeORT is an R package providing native bindings to ONNX Runtime for ML model inference without Python dependencies. It uses cpp11 to interface with the ONNX Runtime C++ API and supports CPU and CoreML (Apple Silicon) execution providers.
+nativeORT is an R package providing native bindings to ONNX Runtime for ML model inference without Python dependencies. It uses cpp11 to interface with the ONNX Runtime C++ API and supports multiple execution providers (CPU, CoreML, CUDA, XNNPACK, OpenVINO).
 
 ## Build and Check Commands
 
@@ -17,53 +17,65 @@ Rscript -e "devtools::test()"
 Rscript -e "devtools::install()"
 
 # CRAN check
-R CMD build .
-R CMD check nativeORT_*.tar.gz
+Rscript -e "devtools::check()"
+
+# Update vendored ORT headers (pulls latest release, strips CRAN-flagged pragmas)
+bash tools/update-ort-headers.sh          # latest
+bash tools/update-ort-headers.sh 1.25.1   # specific version
 ```
 
 `devtools::document()` handles cpp11 registration, roxygen2 docs, NAMESPACE updates, and recompilation automatically.
 
 ## Tests
 
-Tests live in `tests/testthat/test-inference.R` and use `testthat` (edition 3). They validate ONNX inference against R model outputs using two pre-built ONNX models in `inst/extdata/`:
+Tests live in `tests/testthat/` and use `testthat` (edition 3). They validate ONNX inference against R model outputs using two pre-built ONNX models in `inst/extdata/`:
 
 - `lm_iris.onnx` — Linear regression (Petal.Width ~ 3 features), compared with `lm()`
-- `glm_iris.onnx` — Logistic regression (versicolor vs virginica), compared with `glm()`
+- `glm_iris.onnx` — Logistic regression (versicolor vs virginica), compared with `glm()`. Multi-output model (int64 labels + float probabilities).
 
 The Python script `data-raw/build_models.py` generates these models using sklearn + skl2onnx. Tests skip automatically if ORT is not loaded.
+
+## Exported API
+
+- `ort_session(path, provider, ...)` — Load an ONNX model. Returns an S3 object with model metadata (shapes, types, names).
+- `ort_run(session, input)` — Run inference. Validates input dimensions, handles all outputs. Returns array (single output) or named list (multi-output).
+- `ort_install()` — Download ORT binaries and load immediately.
+- `ort_is_installed()` / `ort_is_loaded()` — Check ORT availability.
+- `ort_find_lib()` — Search for ORT shared library across system locations.
 
 ## Architecture
 
 ### Runtime Loading (no link-time dependency)
 
-The package ships ORT C/C++ headers in `src/onnxruntime/` and loads the ORT shared library at runtime via `dlopen`/`LoadLibrary`. There is no configure script and no `-lonnxruntime` link flag.
+The package ships 5 vendored ORT C/C++ headers in `src/onnxruntime/` and loads the ORT shared library at runtime via `dlopen`/`LoadLibrary`. There is no configure script and no `-lonnxruntime` link flag.
 
 - **`src/ort_loader.cpp`** — Provides a `dlopen` shim that defines `OrtGetApiBase()` (the single entry point the header-only C++ API requires). Exposes `ort_load_lib(path)` and `ort_is_loaded()` to R.
-- **`R/find.R`** — `ort_find_lib()` searches for the shared library in: `ORT_ROOT` env var → system paths → per-user R data dir → Python onnxruntime package → pkg-config.
-- **`R/zzz.R`** — `.onLoad` calls `ort_find_lib()` then `ort_load_lib()`. If ORT isn't found, the package loads fine but ORT functions error with a message pointing to `ort_install()`.
+- **`R/runtime.R`** — All runtime lifecycle: exported functions (`ort_is_loaded`, `ort_is_installed`, `ort_find_lib`, `ort_install`) at top, `.onLoad` and internal helpers (`ort_detect_os`, `.ort_lib_name`, `ort_install_dir`, `ort_binary_url`, `ort_codesign`, `ort_download`) below. `.onLoad` calls `ort_find_lib()` then `ort_load_lib()`.
+
+`ort_find_lib()` search order: `ORT_ROOT` env var → system paths (`/usr/local/lib`, `/opt/homebrew/lib`) → per-user R data dir → Python `onnxruntime` package → `pkg-config`.
 
 ### C++ Layer (src/)
 
 All C++ uses cpp11 (`[[cpp11::register]]`, `cpp11::external_pointer`, `cpp11::doubles`, etc.). Each function calls `ort_check_loaded()` before using ORT.
 
-- **ort_loader.cpp** — dlopen shim and `OrtGetApiBase()` override.
-- **session.cpp** — Creates ORT environment and session objects, manages CoreML provider setup, exposes model metadata. Objects stored as `cpp11::external_pointer<>`.
-- **inference.cpp** — `ort_run()` handles double↔float conversion and column-major (R) ↔ row-major (ONNX) permutation in C++, then runs inference.
+- **ort_loader.cpp** — `dlopen` shim, `OrtGetApiBase()` override, `ort_check_loaded()`.
+- **session.cpp** — Creates ORT environment and session objects, manages execution provider setup (CPU, CoreML, CUDA, XNNPACK, OpenVINO via generic `AppendExecutionProvider` API), exposes model metadata (names, shapes, types). Objects stored as `cpp11::external_pointer<>`.
+- **inference.cpp** — `ort_run_()` (internal, called from R's `ort_run()`): handles double↔float conversion, column-major (R) ↔ row-major (ONNX) permutation, and type-aware output (float, double → R double; int32, int64 → R integer).
 - **nativeORT.cpp** — `ort_version()` returns the loaded ORT version string.
-- **cpp11.cpp** — Auto-generated by `cpp11::cpp_register()`; do not edit directly.
+- **cpp11.cpp** — Auto-generated; do not edit directly.
 
 ### R Layer (R/)
 
-- **session.R** — `ort_session(path)` wraps C++ session creation with an S3 class and print method.
-- **inference.R** — `ort_infer_raw(session, input)` wraps `ort_run()` for single-input/single-output models.
-- **install.R** — `ort_install()` downloads ORT binaries (v1.25.1, SHA256-verified), extracts, codesigns on macOS, and loads immediately. Internal helpers: `ort_detect_os()`, `ort_install_dir()`, `ort_download()`, `ort_codesign()`.
-- **find.R** — `ort_find_lib()` multi-location search for the ORT shared library.
-- **loader.R** — Roxygen stub exporting `ort_is_loaded()`.
-- **zzz.R** — `.onLoad` hook that finds and loads ORT.
+- **session.R** — `ort_session(path, provider)` wraps C++ session creation. Stores shapes, types, names on the S3 object. `print.ort_session()` shows input/output metadata.
+- **run.R** — `ort_run(session, input)` validates input dimensions against declared shapes, runs inference on all outputs, returns array (single output) or named list (multi-output).
+- **runtime.R** — ORT lifecycle: find, load, install, platform detection.
+- **nativeORT-package.R** — `useDynLib` registration and `.onLoad`.
+- **cpp11.R** — Auto-generated; do not edit directly.
 
 ### Key Design Patterns
 
 - ORT is loaded at runtime via `dlopen`, not linked at compile time. The package always compiles and installs; ORT is only needed at runtime.
 - A single `OrtGetApiBase()` definition in `ort_loader.cpp` satisfies the linker. The header-only C++ API calls through it transparently.
-- `ort_run()` handles both data type conversion (R double → ORT float → R double) and memory layout conversion (column-major ↔ row-major) in C++.
+- `ort_run_()` in C++ handles both data type conversion (R double → ORT float; ORT int64 → R integer) and memory layout conversion (column-major ↔ row-major).
+- Execution providers use the generic `AppendExecutionProvider(name, options)` ORT API. Provider-specific options (e.g., CoreML MLProgram format) are set in `session.cpp`.
 - ONNX Runtime objects (Env, Session) use RAII via `cpp11::external_pointer` for automatic memory management.
