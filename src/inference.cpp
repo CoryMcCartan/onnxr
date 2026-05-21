@@ -8,7 +8,8 @@
 // R stores arrays column-major, ONNX expects row-major.
 // These functions convert between the two layouts while also casting types.
 
-// Compute strides for row-major and column-major layouts
+// Compute strides for row-major and column-major layouts.
+// Caller must ensure ndim >= 2.
 static void compute_strides(const std::vector<int64_t>& shape,
                             std::vector<size_t>& rm_stride,
                             std::vector<size_t>& cm_stride) {
@@ -16,8 +17,8 @@ static void compute_strides(const std::vector<int64_t>& shape,
     rm_stride.resize(ndim);
     cm_stride.resize(ndim);
     rm_stride[ndim - 1] = 1;
-    for (int k = ndim - 2; k >= 0; k--)
-        rm_stride[k] = rm_stride[k + 1] * shape[k + 1];
+    for (size_t k = ndim - 1; k > 0; k--)
+        rm_stride[k - 1] = rm_stride[k] * shape[k];
     cm_stride[0] = 1;
     for (size_t k = 1; k < ndim; k++)
         cm_stride[k] = cm_stride[k - 1] * shape[k - 1];
@@ -68,10 +69,10 @@ static void permute_rowcol(const Src* src, Dst* dst,
 
     for (size_t cm = 0; cm < n; cm++) {
         size_t tmp = cm, rm = 0;
-        for (int k = ndim - 1; k >= 0; k--) {
-            size_t idx = tmp / cm_stride[k];
-            tmp %= cm_stride[k];
-            rm += idx * rm_stride[k];
+        for (size_t k = ndim; k > 0; k--) {
+            size_t idx = tmp / cm_stride[k - 1];
+            tmp %= cm_stride[k - 1];
+            rm += idx * rm_stride[k - 1];
         }
         dst[cm] = static_cast<Dst>(src[rm]);
     }
@@ -86,6 +87,16 @@ static void set_dim_attr(SEXP result, const std::vector<int64_t>& shape) {
     Rf_setAttrib(result, R_DimSymbol, shape_attr);
 }
 
+// Check whether an R integer vector contains any NA values
+static bool has_int_na(SEXP x) {
+    int* p = INTEGER(x);
+    R_xlen_t len = Rf_xlength(x);
+    for (R_xlen_t i = 0; i < len; i++) {
+        if (p[i] == NA_INTEGER) return true;
+    }
+    return false;
+}
+
 // ---- Input tensor creation ----
 // Create an ORT input tensor from an R vector, dispatching on input_type.
 // Manages its own buffer lifetime via the out_buf pointer.
@@ -98,6 +109,18 @@ static Ort::Value make_input_tensor(
 ) {
     size_t n = 1;
     for (auto d : shape) n *= d;
+
+    // Validate input length matches shape
+    R_xlen_t input_len = Rf_xlength(input_data);
+    if (static_cast<size_t>(input_len) != n) {
+        cpp11::stop("Input has %d elements but shape requires %d.",
+                     static_cast<int>(input_len), static_cast<int>(n));
+    }
+
+    // Check for NAs in integer input
+    if (TYPEOF(input_data) == INTSXP && has_int_na(input_data)) {
+        cpp11::stop("NA values are not supported in ONNX model inputs.");
+    }
 
     switch (input_type) {
         case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT: {
@@ -186,9 +209,10 @@ static SEXP read_output_tensor(Ort::Value& tensor) {
             return result;
         }
         case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64: {
+            // R has no native int64; return as doubles (exact up to 2^53)
             int64_t* data = tensor.GetTensorMutableData<int64_t>();
-            cpp11::writable::integers result(n);
-            permute_rowcol(data, INTEGER(result), shape);
+            cpp11::writable::doubles result(n);
+            permute_rowcol(data, REAL(result), shape);
             set_dim_attr(result, shape);
             return result;
         }

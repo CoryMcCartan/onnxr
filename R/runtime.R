@@ -64,31 +64,7 @@ ort_find_lib <- function() {
         return(normalizePath(pkg_path))
     }
 
-    # 4. Python onnxruntime package
-    python <- Sys.which("python3")
-    if (!nzchar(python)) {
-        python <- Sys.which("python")
-    }
-    if (nzchar(python)) {
-        # fmt: skip
-        py_path <- tryCatch({
-            out <- system2(
-                python,
-                c("-c", shQuote("import onnxruntime, os; print(os.path.dirname(onnxruntime.__file__))")),
-                stdout = TRUE,
-                stderr = FALSE
-            )
-            if (length(out) == 1 && nzchar(out)) {
-                capi_path <- file.path(out, "capi", lib_name)
-                if (file.exists(capi_path)) capi_path else NULL
-            }
-        }, error = function(e) NULL, warning = function(w) NULL)
-        if (!is.null(py_path)) {
-            return(normalizePath(py_path))
-        }
-    }
-
-    # 5. pkg-config
+    # 4. pkg-config
     pkgconf <- Sys.which("pkg-config")
     if (nzchar(pkgconf)) {
         pc_out <- tryCatch(
@@ -136,11 +112,15 @@ ort_install <- function() {
     ort_download(url, dest)
 
     extracted <- file.path(dest, paste0("onnxruntime-", os, "-", .ort_version))
-    file.copy(file.path(extracted, "include"), dest, recursive = TRUE)
-    file.copy(file.path(extracted, "lib"), dest, recursive = TRUE)
+    if (!all(file.copy(file.path(extracted, "include"), dest, recursive = TRUE))) {
+        stop("Failed to copy ONNX Runtime include files to ", dest)
+    }
+    if (!all(file.copy(file.path(extracted, "lib"), dest, recursive = TRUE))) {
+        stop("Failed to copy ONNX Runtime library files to ", dest)
+    }
     unlink(extracted, recursive = TRUE)
 
-    if (os == "osx-arm64") {
+    if (grepl("^osx-", os)) {
         ort_codesign(file.path(dest, "lib"))
     }
 
@@ -166,7 +146,7 @@ ort_detect_os <- function() {
         if (grepl("aarch64|arm64", arch)) {
             "osx-arm64"
         } else {
-            "osx-arm64"
+            "osx-x86_64"
         }
     } else if (os_name == "Linux") {
         if (grepl("aarch64|arm64", arch)) {
@@ -214,8 +194,14 @@ ort_codesign <- function(lib_dir) {
     }
     message("Signing libraries (macOS)...")
     for (lib in dylibs) {
-        system2("xattr", c("-dr", "com.apple.quarantine", shQuote(lib)))
-        system2("codesign", c("--force", "--deep", "--sign", "-", shQuote(lib)))
+        system2("xattr", c("-dr", "com.apple.quarantine", shQuote(lib)),
+                stderr = FALSE) # xattr may fail if no quarantine flag; that's OK
+        ret <- system2("codesign", c("--force", "--deep", "--sign", "-", shQuote(lib)),
+                        stderr = TRUE)
+        if (!is.null(attr(ret, "status"))) {
+            warning("codesign failed for ", basename(lib), ": ",
+                    paste(ret, collapse = "\n"))
+        }
     }
     invisible(lib_dir)
 }

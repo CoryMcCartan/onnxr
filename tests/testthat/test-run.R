@@ -35,8 +35,8 @@ test_that("logistic regression returns named list with correct types", {
     expect_type(result, "list")
     expect_named(result, c("label", "probabilities"))
 
-    # Labels are integers (int64 output)
-    expect_type(result$label, "integer")
+    # Labels are doubles (int64 output returned as double since R has no native int64)
+    expect_type(result$label, "double")
 
     # Probabilities are doubles with correct shape
     expect_type(result$probabilities, "double")

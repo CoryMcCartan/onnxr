@@ -52,7 +52,7 @@ The package ships 5 vendored ORT C/C++ headers in `src/onnxruntime/` and loads t
 - **`src/ort_loader.cpp`** — Provides a `dlopen` shim that defines `OrtGetApiBase()` (the single entry point the header-only C++ API requires). Exposes `ort_load_lib(path)` and `ort_is_loaded()` to R.
 - **`R/runtime.R`** — All runtime lifecycle: exported functions (`ort_is_loaded`, `ort_is_installed`, `ort_find_lib`, `ort_install`) at top, `.onLoad` and internal helpers (`ort_detect_os`, `.ort_lib_name`, `ort_install_dir`, `ort_binary_url`, `ort_codesign`, `ort_download`) below. `.onLoad` calls `ort_find_lib()` then `ort_load_lib()`.
 
-`ort_find_lib()` search order: `ORT_ROOT` env var → system paths (`/usr/local/lib`, `/opt/homebrew/lib`) → per-user R data dir → Python `onnxruntime` package → `pkg-config`.
+`ort_find_lib()` search order: `ORT_ROOT` env var → system paths (`/usr/local/lib`, `/opt/homebrew/lib`) → per-user R data dir → `pkg-config`.
 
 ### C++ Layer (src/)
 

@@ -33,6 +33,14 @@ extern "C" SEXP _nativeORT_ort_is_loaded() {
     return cpp11::as_sexp(ort_is_loaded());
   END_CPP11
 }
+// ort_loader.cpp
+void ort_unload_lib();
+extern "C" SEXP _nativeORT_ort_unload_lib() {
+  BEGIN_CPP11
+    ort_unload_lib();
+    return R_NilValue;
+  END_CPP11
+}
 // session.cpp
 SEXP ort_create_env();
 extern "C" SEXP _nativeORT_ort_create_env() {
@@ -119,6 +127,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_nativeORT_ort_session_output_names",  (DL_FUNC) &_nativeORT_ort_session_output_names,  1},
     {"_nativeORT_ort_session_output_shapes", (DL_FUNC) &_nativeORT_ort_session_output_shapes, 1},
     {"_nativeORT_ort_session_output_types",  (DL_FUNC) &_nativeORT_ort_session_output_types,  1},
+    {"_nativeORT_ort_unload_lib",            (DL_FUNC) &_nativeORT_ort_unload_lib,            0},
     {"_nativeORT_ort_version",               (DL_FUNC) &_nativeORT_ort_version,               0},
     {NULL, NULL, 0}
 };

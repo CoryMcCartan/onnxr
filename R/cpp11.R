@@ -16,6 +16,10 @@ ort_is_loaded <- function() {
   .Call(`_nativeORT_ort_is_loaded`)
 }
 
+ort_unload_lib <- function() {
+  invisible(.Call(`_nativeORT_ort_unload_lib`))
+}
+
 ort_create_env <- function() {
   .Call(`_nativeORT_ort_create_env`)
 }

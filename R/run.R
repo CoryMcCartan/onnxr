@@ -56,9 +56,13 @@ ort_run <- function(session, ..., simplify = FALSE) {
         input_order <- seq_len(session$n_inputs)
     }
 
-    # Validate each input's dimensions
+    # Validate each input's type and dimensions
     for (j in seq_along(input_list)) {
         i <- input_order[j]
+        if (!is.numeric(input_list[[j]]) && !is.integer(input_list[[j]])) {
+            stop(sprintf("Input '%s' must be numeric or integer, not %s.",
+                session$input_names[i], typeof(input_list[[j]])))
+        }
         d <- dim(input_list[[j]])
         expected <- session$input_shapes[[i]]
         if (is.null(d)) {

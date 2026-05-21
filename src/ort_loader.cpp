@@ -40,6 +40,9 @@ void ort_check_loaded() {
 
 [[cpp11::register]]
 bool ort_load_lib(std::string path) {
+    // Prevent double-loading and handle leak
+    if (ort_lib_handle) return true;
+
 #ifdef _WIN32
     ort_lib_handle = LoadLibraryA(path.c_str());
     if (!ort_lib_handle) return false;
@@ -68,4 +71,17 @@ bool ort_load_lib(std::string path) {
 [[cpp11::register]]
 bool ort_is_loaded() {
     return ort_lib_handle != nullptr;
+}
+
+[[cpp11::register]]
+void ort_unload_lib() {
+    if (ort_lib_handle) {
+#ifdef _WIN32
+        FreeLibrary(ort_lib_handle);
+#else
+        dlclose(ort_lib_handle);
+#endif
+        ort_lib_handle = nullptr;
+        ort_get_api_base_fn = nullptr;
+    }
 }
