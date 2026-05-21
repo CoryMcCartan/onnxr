@@ -41,10 +41,10 @@ extern "C" SEXP _nativeORT_ort_create_env() {
   END_CPP11
 }
 // session.cpp
-SEXP ort_create_session(SEXP env_ptr, std::string model_path, std::string provider, std::string cache_dir, int threads, int opt_level);
-extern "C" SEXP _nativeORT_ort_create_session(SEXP env_ptr, SEXP model_path, SEXP provider, SEXP cache_dir, SEXP threads, SEXP opt_level) {
+SEXP ort_create_session(SEXP env_ptr, std::string model_path, std::string provider, std::string cache_dir, int threads, int opt_level, cpp11::strings external_data_files);
+extern "C" SEXP _nativeORT_ort_create_session(SEXP env_ptr, SEXP model_path, SEXP provider, SEXP cache_dir, SEXP threads, SEXP opt_level, SEXP external_data_files) {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_create_session(cpp11::as_cpp<cpp11::decay_t<SEXP>>(env_ptr), cpp11::as_cpp<cpp11::decay_t<std::string>>(model_path), cpp11::as_cpp<cpp11::decay_t<std::string>>(provider), cpp11::as_cpp<cpp11::decay_t<std::string>>(cache_dir), cpp11::as_cpp<cpp11::decay_t<int>>(threads), cpp11::as_cpp<cpp11::decay_t<int>>(opt_level)));
+    return cpp11::as_sexp(ort_create_session(cpp11::as_cpp<cpp11::decay_t<SEXP>>(env_ptr), cpp11::as_cpp<cpp11::decay_t<std::string>>(model_path), cpp11::as_cpp<cpp11::decay_t<std::string>>(provider), cpp11::as_cpp<cpp11::decay_t<std::string>>(cache_dir), cpp11::as_cpp<cpp11::decay_t<int>>(threads), cpp11::as_cpp<cpp11::decay_t<int>>(opt_level), cpp11::as_cpp<cpp11::decay_t<cpp11::strings>>(external_data_files)));
   END_CPP11
 }
 // session.cpp
@@ -107,7 +107,7 @@ extern "C" SEXP _nativeORT_ort_session_output_types(SEXP session_ptr) {
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
     {"_nativeORT_ort_create_env",            (DL_FUNC) &_nativeORT_ort_create_env,            0},
-    {"_nativeORT_ort_create_session",        (DL_FUNC) &_nativeORT_ort_create_session,        6},
+    {"_nativeORT_ort_create_session",        (DL_FUNC) &_nativeORT_ort_create_session,        7},
     {"_nativeORT_ort_is_loaded",             (DL_FUNC) &_nativeORT_ort_is_loaded,             0},
     {"_nativeORT_ort_load_lib",              (DL_FUNC) &_nativeORT_ort_load_lib,              1},
     {"_nativeORT_ort_run_",                  (DL_FUNC) &_nativeORT_ort_run_,                  6},

@@ -53,21 +53,12 @@ ort_session <- function(
 
     model_path <- normalizePath(path)
 
-    # Non-CPU providers (especially CoreML) cannot resolve external data
-    # files (.onnx_data) referenced by the model. Detect and warn.
-    if (provider != "cpu") {
-        model_dir <- dirname(model_path)
-        data_files <- list.files(model_dir, pattern = "[.]onnx_data$",
-            full.names = TRUE)
-        if (length(data_files) > 0) {
-            stop(
-                "Models with external data (.onnx_data) are not supported ",
-                "with the '", provider, "' provider due to an ONNX Runtime ",
-                "limitation. Use provider='cpu', or convert the model to ",
-                "embed its data (e.g., with onnx.save() in Python)."
-            )
-        }
-    }
+    # Detect external data files (.onnx_data) alongside the model.
+    # These are pre-loaded into memory so that non-CPU providers
+    # (especially CoreML) can access them without resolving relative paths.
+    model_dir <- dirname(model_path)
+    external_data <- list.files(model_dir, pattern = "[.]onnx_data$",
+        full.names = TRUE)
 
     env <- ort_create_env()
     sess <- ort_create_session(
@@ -76,7 +67,8 @@ ort_session <- function(
         provider = provider,
         cache_dir = cache,
         threads = as.integer(threads),
-        opt_level = as.integer(opt_level)
+        opt_level = as.integer(opt_level),
+        external_data_files = external_data
     )
 
     input_shapes <- ort_session_input_shapes(sess)

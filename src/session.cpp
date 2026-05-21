@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <fstream>
 #include "ort_loader.h"
 #include "onnxruntime/onnxruntime_cxx_api.h"
 
@@ -18,7 +19,8 @@ SEXP ort_create_session(SEXP env_ptr,
                         std::string provider,
                         std::string cache_dir,
                         int threads,
-                        int opt_level)
+                        int opt_level,
+                        cpp11::strings external_data_files)
 {
     ort_check_loaded();
     cpp11::external_pointer<Ort::Env> env(env_ptr);
@@ -36,6 +38,38 @@ SEXP ort_create_session(SEXP env_ptr,
         default: ort_opt = GraphOptimizationLevel::ORT_ENABLE_ALL; break;
     }
     session_options.SetGraphOptimizationLevel(ort_opt);
+
+    // Load external data files into memory so providers can access them
+    // without resolving relative paths from the model file
+    std::vector<std::vector<char>> data_buffers;
+    if (external_data_files.size() > 0) {
+        std::vector<std::basic_string<ORTCHAR_T>> file_names;
+        std::vector<char*> buffer_ptrs;
+        std::vector<size_t> buffer_lengths;
+
+        data_buffers.resize(external_data_files.size());
+        for (int i = 0; i < external_data_files.size(); i++) {
+            std::string fpath(external_data_files[i]);
+            // Use basename only — must match the 'location' field in the protobuf
+            std::string fname = fpath.substr(fpath.find_last_of("/\\") + 1);
+            file_names.push_back(fname);
+
+            std::ifstream ifs(fpath, std::ios::binary | std::ios::ate);
+            if (!ifs) {
+                cpp11::stop("Failed to read external data file: %s", fpath.c_str());
+            }
+            size_t fsize = ifs.tellg();
+            ifs.seekg(0, std::ios::beg);
+            data_buffers[i].resize(fsize);
+            ifs.read(data_buffers[i].data(), fsize);
+
+            buffer_ptrs.push_back(data_buffers[i].data());
+            buffer_lengths.push_back(fsize);
+        }
+
+        session_options.AddExternalInitializersFromFilesInMemory(
+            file_names, buffer_ptrs, buffer_lengths);
+    }
 
     if (provider != "cpu") {
         std::unordered_map<std::string, std::string> options;

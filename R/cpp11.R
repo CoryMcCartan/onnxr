@@ -20,8 +20,8 @@ ort_create_env <- function() {
   .Call(`_nativeORT_ort_create_env`)
 }
 
-ort_create_session <- function(env_ptr, model_path, provider, cache_dir, threads, opt_level) {
-  .Call(`_nativeORT_ort_create_session`, env_ptr, model_path, provider, cache_dir, threads, opt_level)
+ort_create_session <- function(env_ptr, model_path, provider, cache_dir, threads, opt_level, external_data_files) {
+  .Call(`_nativeORT_ort_create_session`, env_ptr, model_path, provider, cache_dir, threads, opt_level, external_data_files)
 }
 
 ort_session_input_count <- function(session_ptr) {
