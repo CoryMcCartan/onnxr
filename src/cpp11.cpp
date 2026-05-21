@@ -19,6 +19,20 @@ extern "C" SEXP _nativeORT_ort_version() {
     return cpp11::as_sexp(ort_version());
   END_CPP11
 }
+// ort_loader.cpp
+bool ort_load_lib(std::string path);
+extern "C" SEXP _nativeORT_ort_load_lib(SEXP path) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(ort_load_lib(cpp11::as_cpp<cpp11::decay_t<std::string>>(path)));
+  END_CPP11
+}
+// ort_loader.cpp
+bool ort_is_loaded();
+extern "C" SEXP _nativeORT_ort_is_loaded() {
+  BEGIN_CPP11
+    return cpp11::as_sexp(ort_is_loaded());
+  END_CPP11
+}
 // session.cpp
 SEXP ort_create_env();
 extern "C" SEXP _nativeORT_ort_create_env() {
@@ -66,6 +80,8 @@ extern "C" {
 static const R_CallMethodDef CallEntries[] = {
     {"_nativeORT_ort_create_env",           (DL_FUNC) &_nativeORT_ort_create_env,           0},
     {"_nativeORT_ort_create_session",       (DL_FUNC) &_nativeORT_ort_create_session,       6},
+    {"_nativeORT_ort_is_loaded",            (DL_FUNC) &_nativeORT_ort_is_loaded,            0},
+    {"_nativeORT_ort_load_lib",             (DL_FUNC) &_nativeORT_ort_load_lib,             1},
     {"_nativeORT_ort_run",                  (DL_FUNC) &_nativeORT_ort_run,                  5},
     {"_nativeORT_ort_session_input_count",  (DL_FUNC) &_nativeORT_ort_session_input_count,  1},
     {"_nativeORT_ort_session_input_names",  (DL_FUNC) &_nativeORT_ort_session_input_names,  1},

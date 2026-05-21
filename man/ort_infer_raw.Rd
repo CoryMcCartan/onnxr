@@ -2,21 +2,27 @@
 % Please edit documentation in R/inference.R
 \name{ort_infer_raw}
 \alias{ort_infer_raw}
-\title{ort_infer_raw}
+\title{Run inference on an ONNX model}
 \usage{
 ort_infer_raw(session, input)
 }
 \arguments{
-\item{session}{ORT session}
+\item{session}{An `"ort_session"` object created by [ort_session()].}
 
-\item{input}{tensor to infer on}
+\item{input}{A numeric matrix or array to use as model input.
+Must have a `dim` attribute matching the model's expected input shape.}
 }
 \value{
-ORT output
+A numeric array with dimensions matching the model's output shape.
 }
 \description{
-ort_infer_raw
+Passes `input` through the model's first input/output pair and returns
+the result. Handles conversion between R's column-major arrays and
+ONNX's row-major tensors automatically.
 }
 \examples{
-\dontrun{ort_infer_raw(session, input)}
+\dontrun{
+sess <- ort_session("model.onnx")
+ort_infer_raw(sess, input_matrix)
+}
 }

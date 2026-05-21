@@ -1,25 +1,31 @@
-#' session.R
+#' Create an ONNX Runtime inference session
 #'
-#' @param path where the .onnx is located
-#' @param type detection/classificaton/segmentation
-#' @param provider cpu or coreml (only for apple silicon)
-#' @param cache_dir where coreml cache be directed
-#' @param threads =  0 for all, integer otherwise
-#' @param opt_level = 99 for all ops, 1 for basics
+#' Loads an `.onnx` model file and creates a session for running inference.
 #'
-#' @returns ORT session object
+#' @param path Path to an `.onnx` model file.
+#' @param provider Execution provider: `"cpu"` (default) or `"coreml"`
+#'   (Apple Silicon only).
+#' @param cache_dir Optional directory for CoreML model cache.
+#' @param threads Number of threads. `0` (default) uses all available;
+#'   a positive integer sets a fixed thread count.
+#' @param opt_level Graph optimization level. `99` (default) enables all
+#'   optimizations; `1` for basic only; `0` to disable.
+#'
+#' @returns An `"ort_session"` object (a named list) with model metadata
+#'   and internal pointers used by [ort_infer_raw()].
 #' @export
 #'
-#' @examples \dontrun{ort_session('./yolov8n.onnx', 'detection')}
+#' @examples \dontrun{
+#' sess <- ort_session("model.onnx")
+#' sess
+#' }
 ort_session <- function(
     path,
-    type = 'detection',
     provider = "cpu",
     cache_dir = NULL,
     threads = 0L,
     opt_level = 99L
 ) {
-    # file verifications
     if (!file.exists(path)) {
         stop("Model file not found")
     }
@@ -51,7 +57,6 @@ ort_session <- function(
             ptr = sess,
             env = env,
             path = path,
-            type = type,
             provider = provider,
             threads = as.integer(threads),
             opt_level = as.integer(opt_level),
@@ -64,21 +69,12 @@ ort_session <- function(
     )
 }
 
-
-#' print.ort_session
-#'
-#' @param x session object
-#' @param ... extra params
-#'
-#' @returns invisible session
 #' @export
-#'
-#' @examples \dontrun{print(session)}
 print.ort_session <- function(x, ...) {
     cat("nativeORT session\n")
-    cat("  model: ", x$path, "\n")
-    cat(" threads", ifelse(x$threads == 0, "auto", x$threads), "\n")
+    cat("  model:  ", x$path, "\n")
+    cat("  threads:", ifelse(x$threads == 0, "auto", x$threads), "\n")
     cat("  inputs: ", paste(x$input_names, collapse = ", "), "\n")
-    cat("  outputs: ", paste(x$output_names, collapse = ", "), "\n")
+    cat("  outputs:", paste(x$output_names, collapse = ", "), "\n")
     invisible(x)
 }

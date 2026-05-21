@@ -1,9 +1,8 @@
-.onAttach <- function(libname, pkgname) {
-    if (!ort_is_installed()) {
-        packageStartupMessage(
-            "nativeORT: ONNX Runtime not found.\n",
-            "  Run ort_install() to download it \n.",
-            "  Then re-install nativeoRT to enable inference."
-        )
+.onLoad <- function(libname, pkgname) {
+    lib_path <- ort_find_lib()
+    if (!is.null(lib_path)) {
+        if (!ort_load_lib(lib_path)) {
+            warning("Found ONNX Runtime at ", lib_path, " but failed to load it.")
+        }
     }
 }

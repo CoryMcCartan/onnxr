@@ -7,21 +7,16 @@
     "win-x64" = "33f2e8a63774811f99a5fc224cac32f4eed8c27643d46c6cc685319fa8f18019"
 )
 
-#' ort_detect_os
-#'
-#' @returns str - platform
-#' @export
-#'
-#' @examples \dontrun{ort_detect_os()}
+# Detect the current OS and architecture as an ORT platform string.
+# Returns one of "osx-arm64", "linux-aarch64", "linux-x64", or "win-x64".
 ort_detect_os <- function() {
-    os_name <- Sys.info()[['sysname']]
+    os_name <- Sys.info()[["sysname"]]
     arch <- R.version$arch
     if (os_name == "Darwin") {
-        # apple silicon vs x86
         if (grepl("aarch64|arm64", arch)) {
             return("osx-arm64")
         } else {
-            return('osx-arm64')
+            return("osx-arm64")
         }
     } else if (os_name == "Linux") {
         if (grepl("aarch64|arm64", arch)) {
@@ -36,109 +31,66 @@ ort_detect_os <- function() {
     }
 }
 
-#' ort_install_dir
-#'
-#' @returns where the install lives
-#' @export
-#'
-#' @examples \dontrun{ort_install_dir()}
+# Path to the per-user nativeORT data directory.
 ort_install_dir <- function() {
     tools::R_user_dir("nativeORT", which = "data")
 }
 
-#' ort_binary_url
-#'
-#' @returns string where to download onnxruntime from
-#' @export
-#'
-#' @examples \dontrun{ort_binary_url()}
+# Construct the GitHub release URL for the current platform and ORT version.
 ort_binary_url <- function() {
     os <- ort_detect_os()
     base <- "https://github.com/microsoft/onnxruntime/releases/download"
     glue::glue("{base}/v{.ort_version}/onnxruntime-{os}-{.ort_version}.tgz")
 }
 
-#' ort_is_installed
+#' Check whether ONNX Runtime is installed locally
 #'
-#' @returns boolean for if you have onnx runtime or not
+#' Checks for the presence of the ONNX Runtime shared library in the
+#' per-user data directory managed by [ort_install()].
+#'
+#' @returns `TRUE` if the library file exists, `FALSE` otherwise.
 #' @export
 #'
-#' @examples \dontrun{ort_is_installed()}
+#' @examples
+#' ort_is_installed()
 ort_is_installed <- function() {
-    lib_file <- switch(
-        ort_detect_os(),
-        "osx-arm64" = "libonnxruntime.dylib",
-        "osx-x86_64" = "libonnxruntime.dylib",
-        "linux-x64" = "libonnxruntime.so",
-        "linux-aarch64" = "libonnxruntime.so",
-        "win-x64" = "onnxruntime.dll"
-    )
+    lib_file <- .ort_lib_name()
     lib <- file.path(ort_install_dir(), "lib", lib_file)
     file.exists(lib)
 }
 
-#' ort_codesign
-#'
-#' for macs, signs the downloaded binaries
-#'
-#' @param lib_dir where the libraries are
-#'
-#' @returns invisible lib path
-#' @export
-#'
-#' @examples \dontrun{ort_codesign(file.path(ort_install_dir(), "lib"))}
+# Sign downloaded dylibs on macOS to satisfy Gatekeeper.
 ort_codesign <- function(lib_dir) {
-    dylibs <- list.files(
-        lib_dir,
-        pattern = "\\.dylib$",
-        full.names = TRUE
-    )
-
+    dylibs <- list.files(lib_dir, pattern = "\\.dylib$", full.names = TRUE)
     if (length(dylibs) == 0) {
         warning("No .dylib files found!")
     }
-
     message("Signing libraries (macOS)...")
     for (lib in dylibs) {
         system2("xattr", c("-dr", "com.apple.quarantine", shQuote(lib)))
         system2("codesign", c("--force", "--deep", "--sign", "-", shQuote(lib)))
     }
-
     invisible(lib_dir)
 }
 
-#' ort_download
-#'
-#' @param url where to download from
-#' @param dest_dir where to download to
-#'
-#' @returns invisible dest_dir
-#' @export
-#'
-#' @examples \dontrun{ort_download(ort_binary_url(), ort_install_dir())}
+# Download an ORT release tarball and verify its SHA-256 checksum.
 ort_download <- function(url, dest_dir) {
-    # download
     dir.create(dest_dir, recursive = TRUE, showWarnings = FALSE)
     tgz_path <- file.path(dest_dir, basename(url))
 
     message("Downloading ONNX Runtime ", .ort_version, "...")
-    utils::download.file(url, tgz_path, mode = 'wb')
+    utils::download.file(url, tgz_path, mode = "wb")
 
-    #verify checksum
     message("Verifying download...")
     os <- ort_detect_os()
     expected_sum <- .ort_checksums[[os]]
     received_sum <- digest::digest(tgz_path, algo = "sha256", file = TRUE)
 
-    # if it fails
     if (!identical(expected_sum, received_sum)) {
         unlink(tgz_path)
-        stop(
-            "Checksum mismatch! Download my be corrupt, try again!"
-        )
+        stop("Checksum mismatch! Download may be corrupt, try again.")
     }
 
-    # now extract
     message("Checksum verified!")
     message("Extracting...")
 
@@ -148,20 +100,24 @@ ort_download <- function(url, dest_dir) {
     invisible(dest_dir)
 }
 
-#' ort_install
+#' Install ONNX Runtime
 #'
-#' @returns invisible where it was saved to
+#' Downloads pre-built ONNX Runtime binaries for the current platform
+#' and installs them to a per-user data directory. The library is loaded
+#' immediately after installation, so there is no need to restart R.
+#'
+#' @returns Invisibly, the path to the installation directory.
 #' @export
 #'
-#' @examples \dontrun{ort_install()}
+#' @examples \dontrun{
+#' ort_install()
+#' }
 ort_install <- function() {
-    # prevent re-installation
     if (ort_is_installed()) {
         message("onnxruntime ", .ort_version, " is already installed.")
         return(invisible(ort_install_dir()))
     }
 
-    # orchestrate download
     os <- ort_detect_os()
     url <- ort_binary_url()
     dest <- ort_install_dir()
@@ -173,12 +129,18 @@ ort_install <- function() {
     file.copy(file.path(extracted, "lib"), dest, recursive = TRUE)
     unlink(extracted, recursive = TRUE)
 
-    # handle macOS signatures if needed
-    if (os == 'osx-arm64') {
+    if (os == "osx-arm64") {
         ort_codesign(file.path(dest, "lib"))
     }
 
     message("onnxruntime ", .ort_version, " installed successfully!")
     message("location: ", dest)
+
+    # Load the library immediately so it's available without restarting R
+    lib_path <- ort_find_lib()
+    if (!is.null(lib_path) && !ort_is_loaded()) {
+        ort_load_lib(lib_path)
+    }
+
     invisible(dest)
 }

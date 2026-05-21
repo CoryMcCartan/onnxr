@@ -1,9 +1,5 @@
 skip_if_no_ort <- function() {
-    skip_if_not(ort_is_installed(), "ONNX Runtime not installed")
-    tryCatch(
-        ort_version(),
-        error = function(e) skip("nativeORT compiled as stubs (no ORT headers)")
-    )
+    skip_if_not(ort_is_loaded(), "ONNX Runtime not loaded")
 }
 
 test_that("ort_session loads an ONNX model", {

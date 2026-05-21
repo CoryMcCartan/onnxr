@@ -2,16 +2,17 @@
 % Please edit documentation in R/install.R
 \name{ort_is_installed}
 \alias{ort_is_installed}
-\title{ort_is_installed}
+\title{Check whether ONNX Runtime is installed locally}
 \usage{
 ort_is_installed()
 }
 \value{
-boolean for if you have onnx runtime or not
+`TRUE` if the library file exists, `FALSE` otherwise.
 }
 \description{
-ort_is_installed
+Checks for the presence of the ONNX Runtime shared library in the
+per-user data directory managed by [ort_install()].
 }
 \examples{
-\dontrun{ort_is_installed()}
+ort_is_installed()
 }

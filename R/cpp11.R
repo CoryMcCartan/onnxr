@@ -8,6 +8,14 @@ ort_version <- function() {
   .Call(`_nativeORT_ort_version`)
 }
 
+ort_load_lib <- function(path) {
+  .Call(`_nativeORT_ort_load_lib`, path)
+}
+
+ort_is_loaded <- function() {
+  .Call(`_nativeORT_ort_is_loaded`)
+}
+
 ort_create_env <- function() {
   .Call(`_nativeORT_ort_create_env`)
 }

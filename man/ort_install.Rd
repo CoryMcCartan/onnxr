@@ -2,16 +2,20 @@
 % Please edit documentation in R/install.R
 \name{ort_install}
 \alias{ort_install}
-\title{ort_install}
+\title{Install ONNX Runtime}
 \usage{
 ort_install()
 }
 \value{
-invisible where it was saved to
+Invisibly, the path to the installation directory.
 }
 \description{
-ort_install
+Downloads pre-built ONNX Runtime binaries for the current platform
+and installs them to a per-user data directory. The library is loaded
+immediately after installation, so there is no need to restart R.
 }
 \examples{
-\dontrun{ort_install()}
+\dontrun{
+ort_install()
+}
 }

@@ -2,11 +2,10 @@
 % Please edit documentation in R/session.R
 \name{ort_session}
 \alias{ort_session}
-\title{session.R}
+\title{Create an ONNX Runtime inference session}
 \usage{
 ort_session(
   path,
-  type = "detection",
   provider = "cpu",
   cache_dir = NULL,
   threads = 0L,
@@ -14,24 +13,29 @@ ort_session(
 )
 }
 \arguments{
-\item{path}{where the .onnx is located}
+\item{path}{Path to an `.onnx` model file.}
 
-\item{type}{detection/classificaton/segmentation}
+\item{provider}{Execution provider: `"cpu"` (default) or `"coreml"`
+(Apple Silicon only).}
 
-\item{provider}{cpu or coreml (only for apple silicon)}
+\item{cache_dir}{Optional directory for CoreML model cache.}
 
-\item{cache_dir}{where coreml cache be directed}
+\item{threads}{Number of threads. `0` (default) uses all available;
+a positive integer sets a fixed thread count.}
 
-\item{threads}{=  0 for all, integer otherwise}
-
-\item{opt_level}{= 99 for all ops, 1 for basics}
+\item{opt_level}{Graph optimization level. `99` (default) enables all
+optimizations; `1` for basic only; `0` to disable.}
 }
 \value{
-ORT session object
+An `"ort_session"` object (a named list) with model metadata
+  and internal pointers used by [ort_infer_raw()].
 }
 \description{
-session.R
+Loads an `.onnx` model file and creates a session for running inference.
 }
 \examples{
-\dontrun{ort_session('./yolov8n.onnx', 'detection')}
+\dontrun{
+sess <- ort_session("model.onnx")
+sess
+}
 }
