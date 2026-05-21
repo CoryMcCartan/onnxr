@@ -10,7 +10,7 @@ License: MIT + file LICENSE
 LinkingTo:
     cpp11
 Suggests:
-    ggplot2,
+    jpeg,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
@@ -23,3 +23,4 @@ VignetteBuilder: knitr
 URL: https://github.com/calebmcarr/nativeORT
 BugReports: https://github.com/calebmcarr/nativeORT/issues
 RoxygenNote: 7.3.3
+Roxygen: list(markdown = TRUE)

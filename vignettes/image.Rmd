@@ -1,0 +1,104 @@
+---
+title: "End-to-end example"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{End-to-end example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+To demonstrate the package in a more realistic setting, we'll show how to run an image detection network.
+First, we'll download the YOLO26 (You Only Look Once) pretrained model from the Ultralytics repository.
+
+```{r download}
+model_url = "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n.onnx"
+model_path = file.path(tempdir(), "yolo26n.onnx")
+download.file(model_url, model_path, mode = "wb")
+```
+
+Then we can load the package and create a session object for the model.
+```{r session}
+library(nativeORT)
+
+sess = ort_session(model_path)
+print(sess)
+```
+
+We can see that the model takes in a single 640x640 RGB image stored as a 4-dimensional array.
+The [model documentation](https://docs.ultralytics.com/guides/end2end-detection) explains that the output is a set of 300 bounding boxes, each with 6 values: the coordinates of the box (x1, y1, x2, y2), the confidence score, and the class index.
+We can store the object types in a vector for later use.
+
+```{r}
+types = c(
+    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", 
+    "truck", "boat", "traffic light", "fire hydrant", "stop sign", 
+    "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", 
+    "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", 
+    "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", 
+    "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", 
+    "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", 
+    "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", 
+    "donut", "cake", "chair", "couch", "potted plant", "bed", "dining table", 
+    "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", 
+    "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", 
+    "vase", "scissors", "teddy bear", "hair drier", "toothbrush"
+)
+```
+
+Now we are ready to load an image and run the model on it.
+
+```{r load}
+# load image from URL and center in 640x640 array
+img_url = "https://uploads0.wikiart.org/images/johannes-vermeer/the-milkmaid.jpg!Large.jpg"
+img = array(1, dim = sess$input_shapes$images)
+con = url(img_url, "rb")
+raw = jpeg::readJPEG(readBin(con, "raw", n = 5e4))
+close(con)
+img[1, 1:3, 21:620, 53:587] = aperm(raw, c(3, 1, 2))
+
+# helper to plot image
+plot.image <- function(x) {
+    par(mar = c(0, 0, 0, 0))
+    rev_y = rev(1:dim(x)[3])
+    x = 0.299 * x[1, 1, , ] + 0.587 * x[1, 2, , ] + 0.114 * x[1, 3, , ]
+    image(
+        t(x[rev_y, ]),
+        col = gray.colors(256, start = 0, end = 1),
+        asp = nrow(x) / ncol(x),
+        axes = FALSE
+    )
+}
+plot.image(img)
+```
+
+To run the model, we simply call `ort_run()` with the session and the input image.
+We see that the output contains bounding box coordinates, confidence scores, and object type indices, as expected.
+
+```{r run}
+res = ort_run(sess, img)
+dim(res)
+head(res[1, ,])
+```
+
+Finally, we can pull out the bounding boxes with confidence scores above a certain threshold and plot them on top of the image.
+
+```{r plot}
+plot.image(img)
+idx_conf = which(res[1, , 5] >= 0.2)
+for (j in idx_conf) {
+    x1 = res[1, j, 1] / 640
+    y1 = 1 - res[1, j, 2] / 640
+    x2 = res[1, j, 3] / 640
+    y2 = 1 - res[1, j, 4] / 640
+    rect(x1, y1, x2, y2, border = "#a00", lwd = 1)
+    lbl = paste0(types[res[1, j, 6] + 1], " (", round(res[1, j, 5] * 100), "%)")
+    text(x1, y1, lbl, adj = c(0, -0.5), cex = 0.6, col = "#a00")
+}
+```

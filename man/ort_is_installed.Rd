@@ -7,8 +7,8 @@
 ort_is_installed()
 }
 \value{
-`TRUE` if the ONNX Runtime shared library can be found
-  in any of the standard search locations, `FALSE` otherwise.
+\code{TRUE} if the ONNX Runtime shared library can be found
+in any of the standard search locations, \code{FALSE} otherwise.
 }
 \description{
 Check whether ONNX Runtime is available

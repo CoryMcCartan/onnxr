@@ -1,10 +1,15 @@
 #' Create an ONNX Runtime inference session
 #'
-#' Loads an `.onnx` model file and creates a session for running inference.
+#' Loads an `.onnx` model file and creates a session object for running it.
 #'
 #' @param path Path to an `.onnx` model file.
-#' @param provider Execution provider: `"cpu"` (default) or `"coreml"`
-#'   (Apple Silicon only).
+#' @param provider Execution provider. Available options depend on the
+#'   platform and ORT build:
+#'   - `"cpu"` — Default, available everywhere.
+#'   - `"coreml"` — Apple Neural Engine + CPU (macOS/iOS only).
+#'   - `"cuda"` — NVIDIA GPU (requires CUDA-enabled ORT build).
+#'   - `"xnnpack"` — Optimized CPU kernels (mobile/embedded).
+#'   - `"openvino"` — Intel hardware acceleration.
 #' @param cache_dir Optional directory for CoreML model cache.
 #' @param threads Number of threads. `0` (default) uses all available;
 #'   a positive integer sets a fixed thread count.
@@ -15,24 +20,28 @@
 #'   and internal pointers used by [ort_run()].
 #' @export
 #'
-#' @examples \dontrun{
-#' sess <- ort_session("model.onnx")
-#' sess
+#' @examples \donttest{
+#' model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
+#' if (ort_is_loaded() && nzchar(model_path)) {
+#'     sess <- ort_session(model_path)
+#'     sess
+#' }
 #' }
 ort_session <- function(
     path,
-    provider = "cpu",
+    provider = c("cpu", "coreml", "cuda", "xnnpack", "openvino"),
     cache_dir = NULL,
     threads = 0L,
     opt_level = 99L
 ) {
+    provider <- match.arg(provider)
     if (!file.exists(path)) {
         stop("Model file not found")
     }
     if (!grepl("\\.onnx$", path, ignore.case = TRUE)) {
         stop("File must be an .onnx model")
     }
-    if (provider == "coreml" && .Platform$OS.type != "unix") {
+    if (provider == "coreml" && Sys.info()[["sysname"]] != "Darwin") {
         warning("CoreML is only available on macOS, falling back to CPU")
         provider <- "cpu"
     }

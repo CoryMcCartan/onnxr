@@ -6,36 +6,46 @@
 \usage{
 ort_session(
   path,
-  provider = "cpu",
+  provider = c("cpu", "coreml", "cuda", "xnnpack", "openvino"),
   cache_dir = NULL,
   threads = 0L,
   opt_level = 99L
 )
 }
 \arguments{
-\item{path}{Path to an `.onnx` model file.}
+\item{path}{Path to an \code{.onnx} model file.}
 
-\item{provider}{Execution provider: `"cpu"` (default) or `"coreml"`
-(Apple Silicon only).}
+\item{provider}{Execution provider. Available options depend on the
+platform and ORT build:
+\itemize{
+\item \code{"cpu"} — Default, available everywhere.
+\item \code{"coreml"} — Apple Neural Engine + CPU (macOS/iOS only).
+\item \code{"cuda"} — NVIDIA GPU (requires CUDA-enabled ORT build).
+\item \code{"xnnpack"} — Optimized CPU kernels (mobile/embedded).
+\item \code{"openvino"} — Intel hardware acceleration.
+}}
 
 \item{cache_dir}{Optional directory for CoreML model cache.}
 
-\item{threads}{Number of threads. `0` (default) uses all available;
+\item{threads}{Number of threads. \code{0} (default) uses all available;
 a positive integer sets a fixed thread count.}
 
-\item{opt_level}{Graph optimization level. `99` (default) enables all
-optimizations; `1` for basic only; `0` to disable.}
+\item{opt_level}{Graph optimization level. \code{99} (default) enables all
+optimizations; \code{1} for basic only; \code{0} to disable.}
 }
 \value{
-An `"ort_session"` object (a named list) with model metadata
-  and internal pointers used by [ort_run()].
+An \code{"ort_session"} object (a named list) with model metadata
+and internal pointers used by \code{\link[=ort_run]{ort_run()}}.
 }
 \description{
-Loads an `.onnx` model file and creates a session for running inference.
+Loads an \code{.onnx} model file and creates a session object for running it.
 }
 \examples{
-\dontrun{
-sess <- ort_session("model.onnx")
-sess
+\donttest{
+model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
+if (ort_is_loaded() && nzchar(model_path)) {
+    sess <- ort_session(model_path)
+    sess
+}
 }
 }

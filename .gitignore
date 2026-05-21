@@ -9,7 +9,7 @@
 *.bak
 .cache
 
-inst/doc
-src/Makevars
+docs/
 compile_commands.json
 .claude/
+vignettes/*_files/

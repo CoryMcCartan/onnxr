@@ -16,9 +16,13 @@
 #'   list of arrays (multi-output models).
 #' @export
 #'
-#' @examples \dontrun{
-#' sess <- ort_session("model.onnx")
-#' ort_run(sess, input_matrix)
+#' @examples \donttest{
+#' model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
+#' if (ort_is_loaded() && nzchar(model_path)) {
+#'     sess <- ort_session(model_path)
+#'     input <- as.matrix(iris[1:5, c("Sepal.Length", "Sepal.Width", "Petal.Length")])
+#'     ort_run(sess, input)
+#' }
 #' }
 ort_run <- function(session, input) {
     d <- dim(input)

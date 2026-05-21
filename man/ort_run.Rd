@@ -7,17 +7,17 @@
 ort_run(session, input)
 }
 \arguments{
-\item{session}{An `"ort_session"` object created by [ort_session()].}
+\item{session}{An \code{"ort_session"} object created by \code{\link[=ort_session]{ort_session()}}.}
 
 \item{input}{A numeric matrix or array to use as model input.
-Must have a `dim` attribute matching the model's expected input shape.}
+Must have a \code{dim} attribute matching the model's expected input shape.}
 }
 \value{
 A numeric or integer array (single-output models), or a named
-  list of arrays (multi-output models).
+list of arrays (multi-output models).
 }
 \description{
-Passes `input` through the model and returns the results. For models
+Passes \code{input} through the model and returns the results. For models
 with a single output, returns the output array directly. For models
 with multiple outputs, returns a named list of arrays.
 }
@@ -27,8 +27,12 @@ row-major tensors, and between R's numeric types and the model's
 declared element types (float, double, int32, int64).
 }
 \examples{
-\dontrun{
-sess <- ort_session("model.onnx")
-ort_run(sess, input_matrix)
+\donttest{
+model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
+if (ort_is_loaded() && nzchar(model_path)) {
+    sess <- ort_session(model_path)
+    input <- as.matrix(iris[1:5, c("Sepal.Length", "Sepal.Width", "Petal.Length")])
+    ort_run(sess, input)
+}
 }
 }

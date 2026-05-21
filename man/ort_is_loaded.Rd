@@ -4,8 +4,8 @@
 \alias{ort_is_loaded}
 \title{Check whether ONNX Runtime is loaded}
 \value{
-`TRUE` if the ONNX Runtime shared library has been loaded
-  in the current R session, `FALSE` otherwise.
+\code{TRUE} if the ONNX Runtime shared library has been loaded
+in the current R session, \code{FALSE} otherwise.
 }
 \description{
 Check whether ONNX Runtime is loaded

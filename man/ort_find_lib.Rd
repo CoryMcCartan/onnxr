@@ -7,13 +7,13 @@
 ort_find_lib()
 }
 \value{
-Full path to the shared library, or `NULL` if not found.
+Full path to the shared library, or \code{NULL} if not found.
 }
 \description{
 Searches for the ONNX Runtime shared library in standard locations:
-the `ORT_ROOT` environment variable, common system library paths,
-the per-user install from [ort_install()], the Python `onnxruntime`
-package, and `pkg-config`.
+the \code{ORT_ROOT} environment variable, common system library paths,
+the per-user install from \code{\link[=ort_install]{ort_install()}}, the Python \code{onnxruntime}
+package, and \code{pkg-config}.
 }
 \examples{
 ort_find_lib()

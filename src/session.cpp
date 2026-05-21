@@ -37,18 +37,27 @@ SEXP ort_create_session(SEXP env_ptr,
     }
     session_options.SetGraphOptimizationLevel(ort_opt);
 
-    if (provider == "coreml") {
+    if (provider != "cpu") {
         std::unordered_map<std::string, std::string> options;
-        options["ModelFormat"] = "MLProgram";
-        options["MLComputeUnits"] = "CPUAndNeuralEngine";
 
-        if (!cache_dir.empty()) {
-            options["ModelCacheDirectory"] = cache_dir;
+        // Provider-specific default options
+        if (provider == "coreml") {
+            options["ModelFormat"] = "MLProgram";
+            options["MLComputeUnits"] = "CPUAndNeuralEngine";
+            if (!cache_dir.empty()) {
+                options["ModelCacheDirectory"] = cache_dir;
+            }
         }
 
-        session_options.AppendExecutionProvider("CoreML", options);
-    } else if (provider != "cpu") {
-        cpp11::warning("Unknown provider/Unsupported GPU support. Falling back to CPU");
+        // Map short names to ORT provider names
+        std::string ort_name;
+        if (provider == "coreml") ort_name = "CoreML";
+        else if (provider == "cuda") ort_name = "CUDA";
+        else if (provider == "xnnpack") ort_name = "XNNPACK";
+        else if (provider == "openvino") ort_name = "OpenVINO";
+        else ort_name = provider;
+
+        session_options.AppendExecutionProvider(ort_name, options);
     }
 
     Ort::Session* session = new Ort::Session(
