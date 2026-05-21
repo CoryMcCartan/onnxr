@@ -6,10 +6,10 @@
 #include <R_ext/Visibility.h>
 
 // inference.cpp
-cpp11::writable::doubles ort_run(SEXP session_ptr, cpp11::doubles input_array, cpp11::integers input_shape, std::string input_name, std::string output_name);
-extern "C" SEXP _nativeORT_ort_run(SEXP session_ptr, SEXP input_array, SEXP input_shape, SEXP input_name, SEXP output_name) {
+SEXP ort_run_(SEXP session_ptr, cpp11::doubles input_array, cpp11::integers input_shape, std::string input_name, std::string output_name, int output_type);
+extern "C" SEXP _nativeORT_ort_run_(SEXP session_ptr, SEXP input_array, SEXP input_shape, SEXP input_name, SEXP output_name, SEXP output_type) {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_run(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::doubles>>(input_array), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(input_shape), cpp11::as_cpp<cpp11::decay_t<std::string>>(input_name), cpp11::as_cpp<cpp11::decay_t<std::string>>(output_name)));
+    return cpp11::as_sexp(ort_run_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::doubles>>(input_array), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(input_shape), cpp11::as_cpp<cpp11::decay_t<std::string>>(input_name), cpp11::as_cpp<cpp11::decay_t<std::string>>(output_name), cpp11::as_cpp<cpp11::decay_t<int>>(output_type)));
   END_CPP11
 }
 // nativeORT.cpp
@@ -75,19 +75,51 @@ extern "C" SEXP _nativeORT_ort_session_output_names(SEXP session_ptr) {
     return cpp11::as_sexp(ort_session_output_names(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
   END_CPP11
 }
+// session.cpp
+cpp11::writable::list ort_session_input_shapes(SEXP session_ptr);
+extern "C" SEXP _nativeORT_ort_session_input_shapes(SEXP session_ptr) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(ort_session_input_shapes(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
+  END_CPP11
+}
+// session.cpp
+cpp11::writable::list ort_session_output_shapes(SEXP session_ptr);
+extern "C" SEXP _nativeORT_ort_session_output_shapes(SEXP session_ptr) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(ort_session_output_shapes(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
+  END_CPP11
+}
+// session.cpp
+cpp11::writable::integers ort_session_input_types(SEXP session_ptr);
+extern "C" SEXP _nativeORT_ort_session_input_types(SEXP session_ptr) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(ort_session_input_types(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
+  END_CPP11
+}
+// session.cpp
+cpp11::writable::integers ort_session_output_types(SEXP session_ptr);
+extern "C" SEXP _nativeORT_ort_session_output_types(SEXP session_ptr) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(ort_session_output_types(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
+  END_CPP11
+}
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
-    {"_nativeORT_ort_create_env",           (DL_FUNC) &_nativeORT_ort_create_env,           0},
-    {"_nativeORT_ort_create_session",       (DL_FUNC) &_nativeORT_ort_create_session,       6},
-    {"_nativeORT_ort_is_loaded",            (DL_FUNC) &_nativeORT_ort_is_loaded,            0},
-    {"_nativeORT_ort_load_lib",             (DL_FUNC) &_nativeORT_ort_load_lib,             1},
-    {"_nativeORT_ort_run",                  (DL_FUNC) &_nativeORT_ort_run,                  5},
-    {"_nativeORT_ort_session_input_count",  (DL_FUNC) &_nativeORT_ort_session_input_count,  1},
-    {"_nativeORT_ort_session_input_names",  (DL_FUNC) &_nativeORT_ort_session_input_names,  1},
-    {"_nativeORT_ort_session_output_count", (DL_FUNC) &_nativeORT_ort_session_output_count, 1},
-    {"_nativeORT_ort_session_output_names", (DL_FUNC) &_nativeORT_ort_session_output_names, 1},
-    {"_nativeORT_ort_version",              (DL_FUNC) &_nativeORT_ort_version,              0},
+    {"_nativeORT_ort_create_env",            (DL_FUNC) &_nativeORT_ort_create_env,            0},
+    {"_nativeORT_ort_create_session",        (DL_FUNC) &_nativeORT_ort_create_session,        6},
+    {"_nativeORT_ort_is_loaded",             (DL_FUNC) &_nativeORT_ort_is_loaded,             0},
+    {"_nativeORT_ort_load_lib",              (DL_FUNC) &_nativeORT_ort_load_lib,              1},
+    {"_nativeORT_ort_run_",                  (DL_FUNC) &_nativeORT_ort_run_,                  6},
+    {"_nativeORT_ort_session_input_count",   (DL_FUNC) &_nativeORT_ort_session_input_count,   1},
+    {"_nativeORT_ort_session_input_names",   (DL_FUNC) &_nativeORT_ort_session_input_names,   1},
+    {"_nativeORT_ort_session_input_shapes",  (DL_FUNC) &_nativeORT_ort_session_input_shapes,  1},
+    {"_nativeORT_ort_session_input_types",   (DL_FUNC) &_nativeORT_ort_session_input_types,   1},
+    {"_nativeORT_ort_session_output_count",  (DL_FUNC) &_nativeORT_ort_session_output_count,  1},
+    {"_nativeORT_ort_session_output_names",  (DL_FUNC) &_nativeORT_ort_session_output_names,  1},
+    {"_nativeORT_ort_session_output_shapes", (DL_FUNC) &_nativeORT_ort_session_output_shapes, 1},
+    {"_nativeORT_ort_session_output_types",  (DL_FUNC) &_nativeORT_ort_session_output_types,  1},
+    {"_nativeORT_ort_version",               (DL_FUNC) &_nativeORT_ort_version,               0},
     {NULL, NULL, 0}
 };
 }

@@ -9,9 +9,6 @@ Description: Provides R native 'ONNX' model inference without requiring 'Python'
 License: MIT + file LICENSE
 LinkingTo:
     cpp11
-Imports:
-    digest,
-    glue
 Suggests:
     ggplot2,
     knitr,

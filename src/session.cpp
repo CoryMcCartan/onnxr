@@ -108,3 +108,60 @@ cpp11::writable::strings ort_session_output_names(SEXP session_ptr) {
     }
     return names;
 }
+
+// Helper to extract shapes from TypeInfo objects
+static cpp11::writable::list get_shapes(Ort::Session* session, size_t count, bool is_input) {
+    cpp11::writable::list shapes(count);
+    for (size_t i = 0; i < count; i++) {
+        auto type_info = is_input ? session->GetInputTypeInfo(i)
+                                  : session->GetOutputTypeInfo(i);
+        auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
+        auto shape = tensor_info.GetShape();
+        cpp11::writable::integers r_shape(shape.size());
+        for (size_t j = 0; j < shape.size(); j++) {
+            r_shape[j] = static_cast<int>(shape[j]); // -1 for dynamic dims
+        }
+        shapes[i] = r_shape;
+    }
+    return shapes;
+}
+
+// Helper to extract element types
+static cpp11::writable::integers get_types(Ort::Session* session, size_t count, bool is_input) {
+    cpp11::writable::integers types(count);
+    for (size_t i = 0; i < count; i++) {
+        auto type_info = is_input ? session->GetInputTypeInfo(i)
+                                  : session->GetOutputTypeInfo(i);
+        auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
+        types[i] = static_cast<int>(tensor_info.GetElementType());
+    }
+    return types;
+}
+
+[[cpp11::register]]
+cpp11::writable::list ort_session_input_shapes(SEXP session_ptr) {
+    ort_check_loaded();
+    cpp11::external_pointer<Ort::Session> session(session_ptr);
+    return get_shapes(session.get(), session->GetInputCount(), true);
+}
+
+[[cpp11::register]]
+cpp11::writable::list ort_session_output_shapes(SEXP session_ptr) {
+    ort_check_loaded();
+    cpp11::external_pointer<Ort::Session> session(session_ptr);
+    return get_shapes(session.get(), session->GetOutputCount(), false);
+}
+
+[[cpp11::register]]
+cpp11::writable::integers ort_session_input_types(SEXP session_ptr) {
+    ort_check_loaded();
+    cpp11::external_pointer<Ort::Session> session(session_ptr);
+    return get_types(session.get(), session->GetInputCount(), true);
+}
+
+[[cpp11::register]]
+cpp11::writable::integers ort_session_output_types(SEXP session_ptr) {
+    ort_check_loaded();
+    cpp11::external_pointer<Ort::Session> session(session_ptr);
+    return get_types(session.get(), session->GetOutputCount(), false);
+}

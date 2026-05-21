@@ -12,7 +12,7 @@
 #'   optimizations; `1` for basic only; `0` to disable.
 #'
 #' @returns An `"ort_session"` object (a named list) with model metadata
-#'   and internal pointers used by [ort_infer_raw()].
+#'   and internal pointers used by [ort_run()].
 #' @export
 #'
 #' @examples \dontrun{
@@ -52,6 +52,13 @@ ort_session <- function(
         opt_level = as.integer(opt_level)
     )
 
+    input_shapes <- ort_session_input_shapes(sess)
+    output_shapes <- ort_session_output_shapes(sess)
+    input_names <- ort_session_input_names(sess)
+    output_names <- ort_session_output_names(sess)
+    names(input_shapes) <- input_names
+    names(output_shapes) <- output_names
+
     structure(
         list(
             ptr = sess,
@@ -60,21 +67,54 @@ ort_session <- function(
             provider = provider,
             threads = as.integer(threads),
             opt_level = as.integer(opt_level),
-            input_names = ort_session_input_names(sess),
-            output_names = ort_session_output_names(sess),
+            input_names = input_names,
+            output_names = output_names,
             n_inputs = ort_session_input_count(sess),
-            n_outputs = ort_session_output_count(sess)
+            n_outputs = ort_session_output_count(sess),
+            input_shapes = input_shapes,
+            output_shapes = output_shapes,
+            input_types = ort_session_input_types(sess),
+            output_types = ort_session_output_types(sess)
         ),
         class = "ort_session"
     )
 }
 
+# Map ORT element type codes to human-readable names
+.ort_type_names <- c(
+    "undefined", "float", "uint8", "int8", "uint16", "int16",
+    "int32", "int64", "string", "bool", "float16", "double",
+    "uint32", "uint64"
+)
+.ort_type_name <- function(code) {
+    ifelse(code >= 0L & code < length(.ort_type_names),
+        .ort_type_names[code + 1L], paste0("type(", code, ")"))
+}
+
+# Format a shape vector as a string, e.g. "[?, 3]"
+.fmt_shape <- function(shape) {
+    dims <- ifelse(shape < 0L, "?", as.character(shape))
+    paste0("[", paste(dims, collapse = ", "), "]")
+}
+
+
 #' @export
 print.ort_session <- function(x, ...) {
     cat("nativeORT session\n")
     cat("  model:  ", x$path, "\n")
-    cat("  threads:", ifelse(x$threads == 0, "auto", x$threads), "\n")
-    cat("  inputs: ", paste(x$input_names, collapse = ", "), "\n")
-    cat("  outputs:", paste(x$output_names, collapse = ", "), "\n")
+    cat("  provider:", x$provider,
+        " threads:", ifelse(x$threads == 0, "auto", x$threads), "\n")
+    for (i in seq_len(x$n_inputs)) {
+        cat(sprintf("  input:  %s %s <%s>\n",
+            x$input_names[i],
+            .fmt_shape(x$input_shapes[[i]]),
+            .ort_type_name(x$input_types[i])))
+    }
+    for (i in seq_len(x$n_outputs)) {
+        cat(sprintf("  output: %s %s <%s>\n",
+            x$output_names[i],
+            .fmt_shape(x$output_shapes[[i]]),
+            .ort_type_name(x$output_types[i])))
+    }
     invisible(x)
 }

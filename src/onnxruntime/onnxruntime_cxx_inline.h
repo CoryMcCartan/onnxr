@@ -2715,13 +2715,7 @@ inline Status Logger::LogMessage(OrtLoggingLevel log_severity_level, const ORTCH
 // for gcc and clang. The alternative is to use actual C-style variadic parameters and apply
 // __attribute__(format(printf...)), which does not work with variadic templates.
 #if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
-#pragma GCC diagnostic ignored "-Wformat-security"
 #elif defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#pragma clang diagnostic ignored "-Wformat-security"
 #endif
 template <typename... Args>
 inline Status Logger::LogFormattedMessage(OrtLoggingLevel log_severity_level, const ORTCHAR_T* file_path,
@@ -2757,9 +2751,7 @@ inline Status Logger::LogFormattedMessage(OrtLoggingLevel log_severity_level, co
 }
 // Re-enable -Wformat-nonliteral and -Wformat-security
 #if defined(__GNUC__)
-#pragma GCC diagnostic pop
 #elif defined(__clang__)
-#pragma clang diagnostic pop
 #endif
 
 inline KernelContext::KernelContext(OrtKernelContext* context) : ctx_(context) {

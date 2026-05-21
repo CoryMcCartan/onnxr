@@ -5,6 +5,7 @@
 ^cran-comments\.md$
 ^data-raw$
 ^CLAUDE\.md$
-^\.claude\/
-^\.cache\/
+^\.claude$
+^\.cache$
 ^compile_commands\.json$
+^tools$

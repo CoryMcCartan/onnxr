@@ -2,9 +2,9 @@
 
 S3method(print,ort_session)
 export(ort_find_lib)
-export(ort_infer_raw)
 export(ort_install)
 export(ort_is_installed)
 export(ort_is_loaded)
+export(ort_run)
 export(ort_session)
 useDynLib(nativeORT, .registration = TRUE)

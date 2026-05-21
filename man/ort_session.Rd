@@ -28,7 +28,7 @@ optimizations; `1` for basic only; `0` to disable.}
 }
 \value{
 An `"ort_session"` object (a named list) with model metadata
-  and internal pointers used by [ort_infer_raw()].
+  and internal pointers used by [ort_run()].
 }
 \description{
 Loads an `.onnx` model file and creates a session for running inference.
