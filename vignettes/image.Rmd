@@ -23,12 +23,12 @@ model_path = file.path(tempdir(), "yolo26n.onnx")
 download.file(model_url, model_path, mode = "wb")
 ```
 
-Then we can load the package and create a session object for the model.
+Then we can load the package and load the model.
 ```{r session}
 library(nativeORT)
 
-sess = ort_session(model_path)
-print(sess)
+model = ort_model(model_path)
+print(model)
 ```
 
 We can see that the model takes in a single 640x640 RGB image stored as a 4-dimensional array.
@@ -57,7 +57,7 @@ Now we are ready to load an image (Vermeer's [*The Milkmaid*](https://en.wikiped
 ```{r load}
 # load image from URL and center in 640x640 array
 img_url = "https://uploads0.wikiart.org/images/johannes-vermeer/the-milkmaid.jpg!Large.jpg"
-img = array(1, dim = sess$input_shapes$images)
+img = array(1, dim = model$input_shapes$images)
 con = url(img_url, "rb")
 raw = jpeg::readJPEG(readBin(con, "raw", n = 5e4))
 close(con)
@@ -83,7 +83,7 @@ The `simplify = TRUE` argument tells the function to return the single output ar
 We see that the output contains bounding box coordinates, confidence scores, and object type indices, as expected.
 
 ```{r run}
-res = ort_run(sess, img, simplify = TRUE)
+res = ort_run(model, img, simplify = TRUE)
 dim(res)
 head(res[1, ,])
 ```

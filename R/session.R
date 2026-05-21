@@ -1,6 +1,6 @@
-#' Create an ONNX Runtime inference session
+#' Load an ONNX model
 #'
-#' Loads an `.onnx` model file and creates a session object for running it.
+#' Loads an `.onnx` model file and creates a model object for running inference.
 #'
 #' @param path Path to an `.onnx` model file.
 #' @param provider Execution provider. Available options depend on the
@@ -16,18 +16,18 @@
 #' @param opt_level Graph optimization level. `99` (default) enables all
 #'   optimizations; `1` for basic only; `0` to disable.
 #'
-#' @returns An `"ort_session"` object (a named list) with model metadata
+#' @returns An `"ort_model"` object (a named list) with model metadata
 #'   and internal pointers used by [ort_run()].
 #' @export
 #'
 #' @examples \donttest{
 #' model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
 #' if (ort_is_loaded() && nzchar(model_path)) {
-#'     sess <- ort_session(model_path)
+#'     sess <- ort_model(model_path)
 #'     sess
 #' }
 #' }
-ort_session <- function(
+ort_model <- function(
     path,
     provider = c("cpu", "coreml", "cuda", "xnnpack", "openvino"),
     cache_dir = tools::R_user_dir("nativeORT", "cache"),
@@ -95,7 +95,7 @@ ort_session <- function(
             input_types = ort_session_input_types(sess),
             output_types = ort_session_output_types(sess)
         ),
-        class = "ort_session"
+        class = "ort_model"
     )
 }
 
@@ -132,8 +132,8 @@ ort_session <- function(
 
 
 #' @export
-print.ort_session <- function(x, ...) {
-    cat("nativeORT session\n")
+print.ort_model <- function(x, ...) {
+    cat("nativeORT model\n")
     cat("  model:  ", x$path, "\n")
     cat("  provider:", x$provider, " threads:", ifelse(x$threads == 0, "auto", x$threads), "\n")
     for (i in seq_len(x$n_inputs)) {

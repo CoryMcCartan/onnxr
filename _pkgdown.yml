@@ -6,7 +6,7 @@ template:
 reference:
 - title: Load and run a model
   contents:
-  - ort_session
+  - ort_model
   - ort_run
 
 - title: Manage the ONNX runtime

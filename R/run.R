@@ -8,7 +8,7 @@
 #' row-major tensors, and between R's numeric types and the model's
 #' declared element types (float, double, int32, int64).
 #'
-#' @param session An `"ort_session"` object created by [ort_session()].
+#' @param session An `"ort_model"` object created by [ort_model()].
 #' @param ... Input arrays, either as unnamed arguments (matched to model
 #'   inputs by position) or as named arguments (matched by name). Each
 #'   input must be a numeric or integer matrix/array with dimensions
@@ -24,7 +24,7 @@
 #' @examples \donttest{
 #' model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
 #' if (ort_is_loaded() && nzchar(model_path)) {
-#'     sess <- ort_session(model_path)
+#'     sess <- ort_model(model_path)
 #'     input <- as.matrix(iris[1:5, c("Sepal.Length", "Sepal.Width", "Petal.Length")])
 #'     ort_run(sess, input)
 #' }

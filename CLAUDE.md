@@ -37,7 +37,7 @@ The Python script `data-raw/build_models.py` generates these models using sklear
 
 ## Exported API
 
-- `ort_session(path, provider, ...)` — Load an ONNX model. Returns an S3 object with model metadata (shapes, types, names).
+- `ort_model(path, provider, ...)` — Load an ONNX model. Returns an S3 object with model metadata (shapes, types, names).
 - `ort_run(session, input)` — Run inference. Validates input dimensions, handles all outputs. Returns array (single output) or named list (multi-output).
 - `ort_install()` — Download ORT binaries and load immediately.
 - `ort_is_installed()` / `ort_is_loaded()` — Check ORT availability.
@@ -66,7 +66,7 @@ All C++ uses cpp11 (`[[cpp11::register]]`, `cpp11::external_pointer`, `cpp11::do
 
 ### R Layer (R/)
 
-- **session.R** — `ort_session(path, provider)` wraps C++ session creation. Stores shapes, types, names on the S3 object. `print.ort_session()` shows input/output metadata.
+- **session.R** — `ort_model(path, provider)` wraps C++ session creation. Stores shapes, types, names on the S3 object. `print.ort_model()` shows input/output metadata.
 - **run.R** — `ort_run(session, input)` validates input dimensions against declared shapes, runs inference on all outputs, returns array (single output) or named list (multi-output).
 - **runtime.R** — ORT lifecycle: find, load, install, platform detection.
 - **nativeORT-package.R** — `useDynLib` registration and `.onLoad`.

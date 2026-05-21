@@ -4,7 +4,7 @@ test_that("linear regression predictions match lm()", {
     model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
     skip_if(model_path == "", "Test model not found")
 
-    sess <- ort_session(model_path)
+    sess <- ort_model(model_path)
 
     # Fit equivalent R model: Petal.Width ~ Sepal.Length + Sepal.Width + Petal.Length
     r_model <- lm(Petal.Width ~ Sepal.Length + Sepal.Width + Petal.Length, data = iris)
@@ -24,7 +24,7 @@ test_that("logistic regression returns named list with correct types", {
     model_path <- system.file("extdata", "glm_iris.onnx", package = "nativeORT")
     skip_if(model_path == "", "Test model not found")
 
-    sess <- ort_session(model_path)
+    sess <- ort_model(model_path)
 
     iris_sub <- iris[iris$Species != "setosa", ]
     input_mat <- as.matrix(iris_sub[, 1:4])
@@ -49,7 +49,7 @@ test_that("logistic regression probabilities match glm()", {
     model_path <- system.file("extdata", "glm_iris.onnx", package = "nativeORT")
     skip_if(model_path == "", "Test model not found")
 
-    sess <- ort_session(model_path)
+    sess <- ort_model(model_path)
 
     iris_sub <- iris[iris$Species != "setosa", ]
     y <- as.integer(iris_sub$Species == "virginica")
@@ -77,7 +77,7 @@ test_that("input validation catches wrong dimensions", {
     model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
     skip_if(model_path == "", "Test model not found")
 
-    sess <- ort_session(model_path)
+    sess <- ort_model(model_path)
 
     # Wrong number of columns (4 instead of 3)
     bad_input <- matrix(1:8, nrow = 2, ncol = 4)
@@ -97,7 +97,7 @@ test_that("integer input produces same results as numeric input", {
     model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
     skip_if(model_path == "", "Test model not found")
 
-    sess <- ort_session(model_path)
+    sess <- ort_model(model_path)
 
     # Use integer values that can be represented exactly as floats
     input_num <- matrix(c(5, 3, 1, 6, 3, 4), nrow = 2, ncol = 3)
@@ -115,7 +115,7 @@ test_that("named input matching works", {
     model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
     skip_if(model_path == "", "Test model not found")
 
-    sess <- ort_session(model_path)
+    sess <- ort_model(model_path)
     input_mat <- as.matrix(iris[1:5, c("Sepal.Length", "Sepal.Width", "Petal.Length")])
 
     # Named input matching by model input name
@@ -134,7 +134,7 @@ test_that("simplify controls single-output return type", {
     model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
     skip_if(model_path == "", "Test model not found")
 
-    sess <- ort_session(model_path)
+    sess <- ort_model(model_path)
     input_mat <- as.matrix(iris[1:3, c("Sepal.Length", "Sepal.Width", "Petal.Length")])
 
     # Default: always returns a named list
@@ -154,7 +154,7 @@ test_that("wrong number of inputs errors", {
     model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
     skip_if(model_path == "", "Test model not found")
 
-    sess <- ort_session(model_path)
+    sess <- ort_model(model_path)
     input_mat <- matrix(1:6, nrow = 2, ncol = 3)
 
     # Too many positional inputs for a single-input model

@@ -7,7 +7,7 @@
 ort_run(session, ..., simplify = FALSE)
 }
 \arguments{
-\item{session}{An \code{"ort_session"} object created by \code{\link[=ort_session]{ort_session()}}.}
+\item{session}{An \code{"ort_model"} object created by \code{\link[=ort_model]{ort_model()}}.}
 
 \item{...}{Input arrays, either as unnamed arguments (matched to model
 inputs by position) or as named arguments (matched by name). Each
@@ -36,7 +36,7 @@ declared element types (float, double, int32, int64).
 \donttest{
 model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
 if (ort_is_loaded() && nzchar(model_path)) {
-    sess <- ort_session(model_path)
+    sess <- ort_model(model_path)
     input <- as.matrix(iris[1:5, c("Sepal.Length", "Sepal.Width", "Petal.Length")])
     ort_run(sess, input)
 }

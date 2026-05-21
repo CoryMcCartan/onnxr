@@ -55,18 +55,18 @@ After this, you can start inferencing on .onnx engines!
 
 ## Usage
 
-### Creating an ORT Session
+### Loading a Model
 
 You'll need access to a .onnx file. Here's we'll use YOLOv11 nano from ultralytics as an
 example.
 
 ```r
-session <- nativeORT::ort_session(model_path)
+session <- nativeORT::ort_model(model_path)
 ```
 
 ### Inferencing
 
-Now that you've created an ORT session (which handles all of the threading setup, etc.),
+Now that you've loaded a model (which handles all of the threading setup, etc.),
 you can inference easily with standard R arrays.
 
 ```r
@@ -91,7 +91,7 @@ It's easy, only requiring a change in the session creation:
 dir.create(path.expand("~/.nativeORT/cache"),
            recursive = TRUE, showWarnings = FALSE
            )
-session <- nativeORT::ort_session(model_path,
+session <- nativeORT::ort_model(model_path,
                                   provider='coreml',
                                   cache_dir=path.expand("~/.nativeORT/cache")
            )
