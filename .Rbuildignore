@@ -3,3 +3,8 @@
 ^LICENSE\.md$
 ^CRAN-SUBMISSION$
 ^cran-comments\.md$
+^data-raw$
+^CLAUDE\.md$
+^\.claude\/
+^\.cache\/
+^compile_commands\.json$
