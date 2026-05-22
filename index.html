@@ -56,7 +56,7 @@
 <div class="page-header"><h1 id="onnxr">onnxr<a class="anchor" aria-label="anchor" href="#onnxr"></a>
 </h1></div>
 <!-- badges: start -->
-<!-- badges: end -->
+
 <p>The <strong>onnxr</strong> package provides native R access to the <a href="https://onnxruntime.ai" class="external-link">Open Neural Network Exchange (ONNX) Runtime</a>, which is a performant engine for running machine learning models that are saved to a standardized format. Rather than interfacing with ONNX via Python, as in the official <a href="https://cran.r-project.org/package=onnx" class="external-link">onnx</a> R package, this package directly interfaces with the runtime’s C++ API via <a href="https://cran.r-project.org/package=cpp11" class="external-link">cpp11</a>. This uses far less memory and does not require a Python and TensorFlow installation.</p>
 <p>Models saved to <code>.onnx</code> files can be loaded and run on various backends, including CPUs and Apple’s CoreML library.</p>
 <div class="section level2">
@@ -79,13 +79,13 @@
 <span></span>
 <span><span class="va">model_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"glm_iris.onnx"</span>, package <span class="op">=</span> <span class="st">"onnxr"</span><span class="op">)</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/onnx_model.html">onnx_model</a></span><span class="op">(</span><span class="va">model_path</span><span class="op">)</span></span></code></pre></div>
-<p>By default, the model will run on the CPU. Other backends are available with the <code>provider</code> argument to <code><a href="reference/onnx_model.html">onnx_model()</a></code>. For example, setting <code>onnx_model(model_path, provider = "coreml")</code> would load the model to run via Apple’s CoreML library on Apple Silicon devices.</p>
+<p>By default, the model will run on the CPU. Other backends are available with the <code>backend</code> argument to <code><a href="reference/onnx_model.html">onnx_model()</a></code>. For example, setting <code>onnx_model(model_path, backend = "coreml")</code> would load the model to run via Apple’s CoreML library on Apple Silicon devices.</p>
 <p>Printing the model object shows information on the input and output arrays.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span></span>
 <span><span class="co">#&gt; onnxr model</span></span>
-<span><span class="co">#&gt;   model:   /private/var/folders/64/lv8c__115kj6hxqc1f9sq5zr0000gn/T/Rtmpr7nLCV/temp_libpath76a353eefb06/onnxr/extdata/glm_iris.onnx </span></span>
-<span><span class="co">#&gt;   provider: cpu  threads: 1 </span></span>
+<span><span class="co">#&gt;   model:   /private/var/folders/64/lv8c__115kj6hxqc1f9sq5zr0000gn/T/Rtmp8PRFoT/temp_libpath7a5966e22f64/onnxr/extdata/glm_iris.onnx </span></span>
+<span><span class="co">#&gt;   backend: cpu  threads: 1 </span></span>
 <span><span class="co">#&gt;   input:  X [?, 4] &lt;float&gt;</span></span>
 <span><span class="co">#&gt;   output: label [?] &lt;int64&gt;</span></span>
 <span><span class="co">#&gt;   output: probabilities [?, 2] &lt;float&gt;</span></span></code></pre></div>
@@ -137,7 +137,12 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/CoryMcCartan/onnxr/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/CoryMcCartan/onnxr/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>
