@@ -5,7 +5,9 @@ Version: 0.1.0
 Authors@R: c(
     person("Cory", "McCartan", email = "mccartan@psu.edu", role = c("aut", "cre")),
     person("Caleb", "Carr", email = "calebmcarr1@gmail.com", role = "cph", 
-        comment = "Author of 'nativeORT' package that is the basis for this package")
+        comment = "Author of 'nativeORT' package that is the basis for this package"),
+    person("Microsoft Corporation", role = "cph", 
+        comment = "Copyright holder of src/onnxruntime headers")
   )
 Description: Provides native R access to the 'Open Neural Network Exchange' (ONNX) 
     Runtime <https://onnxruntime.ai/>, which is a performant engine for running
