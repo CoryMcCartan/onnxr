@@ -1,4 +1,4 @@
-url: ~
+url: http://corymccartan.com/onnxr/
 template:
   bootstrap: 5
 
@@ -15,3 +15,4 @@ reference:
   - onnx_find_lib
   - onnx_is_installed
   - onnx_is_loaded
+
