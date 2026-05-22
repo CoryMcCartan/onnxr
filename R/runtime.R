@@ -1,5 +1,5 @@
-.ort_version <- "1.25.1"
-.ort_version_short <- "1.25"
+.onnx_version <- "1.25.1"
+.onnx_version_short <- "1.25"
 
 # ---- Exported functions ----
 
@@ -8,10 +8,10 @@
 #' @returns `TRUE` if the ONNX Runtime shared library has been loaded
 #'   in the current R session, `FALSE` otherwise.
 #' @export
-#' @name ort_is_loaded
+#' @name onnx_is_loaded
 #'
 #' @examples
-#' ort_is_loaded()
+#' onnx_is_loaded()
 NULL
 
 #' Check whether ONNX Runtime is available
@@ -21,25 +21,25 @@ NULL
 #' @export
 #'
 #' @examples
-#' ort_is_installed()
-ort_is_installed <- function() {
-    !is.null(ort_find_lib())
+#' onnx_is_installed()
+onnx_is_installed <- function() {
+    !is.null(onnx_find_lib())
 }
 
 #' Find the ONNX Runtime shared library
 #'
 #' Searches for the ONNX Runtime shared library in standard locations:
 #' the `ORT_ROOT` environment variable, common system library paths,
-#' the per-user install from [ort_install()], the Python `onnxruntime`
+#' the per-user install from [onnx_install()], the Python `onnxruntime`
 #' package, and `pkg-config`.
 #'
 #' @returns Full path to the shared library, or `NULL` if not found.
 #' @export
 #'
 #' @examples
-#' ort_find_lib()
-ort_find_lib <- function() {
-    lib_name <- .ort_lib_name()
+#' onnx_find_lib()
+onnx_find_lib <- function() {
+    lib_name <- .onnx_lib_name()
 
     # 1. ORT_ROOT env var
     ort_root <- Sys.getenv("ORT_ROOT", "")
@@ -58,8 +58,8 @@ ort_find_lib <- function() {
         if (file.exists(path)) return(normalizePath(path))
     }
 
-    # 3. Package's R_user_dir (from ort_install())
-    pkg_path <- file.path(ort_install_dir(), "lib", lib_name)
+    # 3. Package's R_user_dir (from onnx_install())
+    pkg_path <- file.path(onnx_install_dir(), "lib", lib_name)
     if (file.exists(pkg_path)) {
         return(normalizePath(pkg_path))
     }
@@ -97,21 +97,21 @@ ort_find_lib <- function() {
 #' @export
 #'
 #' @examples \dontrun{
-#' ort_install()
+#' onnx_install()
 #' }
-ort_install <- function() {
-    if (ort_is_installed()) {
-        message("onnxruntime ", .ort_version, " is already installed.")
-        return(invisible(ort_install_dir()))
+onnx_install <- function() {
+    if (onnx_is_installed()) {
+        message("onnxruntime ", .onnx_version, " is already installed.")
+        return(invisible(onnx_install_dir()))
     }
 
-    os <- ort_detect_os()
-    url <- ort_binary_url()
-    dest <- ort_install_dir()
+    os <- onnx_detect_os()
+    url <- onnx_binary_url()
+    dest <- onnx_install_dir()
 
-    ort_download(url, dest)
+    onnx_download(url, dest)
 
-    extracted <- file.path(dest, paste0("onnxruntime-", os, "-", .ort_version))
+    extracted <- file.path(dest, paste0("onnxruntime-", os, "-", .onnx_version))
     if (!all(file.copy(file.path(extracted, "include"), dest, recursive = TRUE))) {
         stop("Failed to copy ONNX Runtime include files to ", dest)
     }
@@ -121,16 +121,16 @@ ort_install <- function() {
     unlink(extracted, recursive = TRUE)
 
     if (grepl("^osx-", os)) {
-        ort_codesign(file.path(dest, "lib"))
+        onnx_codesign(file.path(dest, "lib"))
     }
 
-    message("onnxruntime ", .ort_version, " installed successfully.")
+    message("onnxruntime ", .onnx_version, " installed successfully.")
     message("location: ", dest)
 
     # Load the library immediately so it's available without restarting R
-    lib_path <- ort_find_lib()
-    if (!is.null(lib_path) && !ort_is_loaded()) {
-        ort_load_lib(lib_path)
+    lib_path <- onnx_find_lib()
+    if (!is.null(lib_path) && !onnx_is_loaded()) {
+        onnx_load_lib(lib_path)
     }
 
     invisible(dest)
@@ -139,7 +139,7 @@ ort_install <- function() {
 # ---- Internal helpers ----
 
 # Detect the current OS and architecture as an ORT platform string.
-ort_detect_os <- function() {
+onnx_detect_os <- function() {
     os_name <- Sys.info()[["sysname"]]
     arch <- R.version$arch
     if (os_name == "Darwin") {
@@ -162,8 +162,8 @@ ort_detect_os <- function() {
 }
 
 # Platform-specific shared library filename.
-.ort_lib_name <- function() {
-    os <- ort_detect_os()
+.onnx_lib_name <- function() {
+    os <- onnx_detect_os()
     switch(
         os,
         "osx-arm64" = ,
@@ -174,44 +174,45 @@ ort_detect_os <- function() {
     )
 }
 
-# Path to the per-user nativeORT data directory.
-ort_install_dir <- function() {
-    tools::R_user_dir("nativeORT", which = "data")
+# Path to the per-user onnxr data directory.
+onnx_install_dir <- function() {
+    tools::R_user_dir("onnxr", which = "data")
 }
 
 # Construct the GitHub release URL for the current platform and ORT version.
-ort_binary_url <- function() {
-    os <- ort_detect_os()
+onnx_binary_url <- function() {
+    os <- onnx_detect_os()
     base <- "https://github.com/microsoft/onnxruntime/releases/download"
-    paste0(base, "/v", .ort_version, "/onnxruntime-", os, "-", .ort_version, ".tgz")
+    paste0(base, "/v", .onnx_version, "/onnxruntime-", os, "-", .onnx_version, ".tgz")
 }
 
 # Sign downloaded dylibs on macOS to satisfy Gatekeeper.
-ort_codesign <- function(lib_dir) {
+onnx_codesign <- function(lib_dir) {
     dylibs <- list.files(lib_dir, pattern = "\\.dylib$", full.names = TRUE)
     if (length(dylibs) == 0) {
         warning("No .dylib files found!")
     }
     message("Signing libraries (macOS)...")
     for (lib in dylibs) {
-        system2("xattr", c("-dr", "com.apple.quarantine", shQuote(lib)),
-                stderr = FALSE) # xattr may fail if no quarantine flag; that's OK
-        ret <- system2("codesign", c("--force", "--deep", "--sign", "-", shQuote(lib)),
-                        stderr = TRUE)
+        system2("xattr", c("-dr", "com.apple.quarantine", shQuote(lib)), stderr = FALSE) # xattr may fail if no quarantine flag; that's OK
+        ret <- system2(
+            "codesign",
+            c("--force", "--deep", "--sign", "-", shQuote(lib)),
+            stderr = TRUE
+        )
         if (!is.null(attr(ret, "status"))) {
-            warning("codesign failed for ", basename(lib), ": ",
-                    paste(ret, collapse = "\n"))
+            warning("codesign failed for ", basename(lib), ": ", paste(ret, collapse = "\n"))
         }
     }
     invisible(lib_dir)
 }
 
 # Download an ORT release tarball.
-ort_download <- function(url, dest_dir) {
+onnx_download <- function(url, dest_dir) {
     dir.create(dest_dir, recursive = TRUE, showWarnings = FALSE)
     tgz_path <- file.path(dest_dir, basename(url))
 
-    message("Downloading ONNX Runtime ", .ort_version, "...")
+    message("Downloading ONNX Runtime ", .onnx_version, "...")
     utils::download.file(url, tgz_path, mode = "wb")
 
     message("Extracting...")

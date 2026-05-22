@@ -1,8 +1,9 @@
 #include <cpp11.hpp>
 #include <string>
 
-// Include the ORT C API header for type declarations
+// Include the ORT C/C++ API headers
 #include "onnxruntime/onnxruntime_c_api.h"
+#include "onnxruntime/onnxruntime_cxx_api.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -29,17 +30,17 @@ ORT_EXPORT const OrtApiBase* ORT_API_CALL OrtGetApiBase(void) NO_EXCEPTION {
 }
 
 // Check that ORT is loaded, stop with helpful message if not
-void ort_check_loaded() {
+void onnx_check_loaded() {
     if (!ort_lib_handle) {
         cpp11::stop(
             "ONNX Runtime not loaded. "
-            "Run ort_install() to download it, or install ORT system-wide."
+            "Run onnx_install() to download it, or install ORT system-wide."
         );
     }
 }
 
 [[cpp11::register]]
-bool ort_load_lib(std::string path) {
+bool onnx_load_lib(std::string path) {
     // Prevent double-loading and handle leak
     if (ort_lib_handle) return true;
 
@@ -69,12 +70,12 @@ bool ort_load_lib(std::string path) {
 }
 
 [[cpp11::register]]
-bool ort_is_loaded() {
+bool onnx_is_loaded() {
     return ort_lib_handle != nullptr;
 }
 
 [[cpp11::register]]
-void ort_unload_lib() {
+void onnx_unload_lib() {
     if (ort_lib_handle) {
 #ifdef _WIN32
         FreeLibrary(ort_lib_handle);
@@ -84,4 +85,10 @@ void ort_unload_lib() {
         ort_lib_handle = nullptr;
         ort_get_api_base_fn = nullptr;
     }
+}
+
+[[cpp11::register]]
+std::string onnx_version() {
+    onnx_check_loaded();
+    return std::string(OrtGetApiBase()->GetVersionString());
 }

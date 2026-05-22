@@ -1,129 +1,89 @@
-# nativeORT
 
-[![CRAN status](https://www.r-pkg.org/badges/version/nativeORT)](https://CRAN.R-project.org/package=nativeORT)
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 
----
+# onnxr
 
-**Native ONNX Runtime inference for R, no Python required.**
+<!-- badges: start -->
 
-nativeORT is the only R-native ONNX inference engine with no Python/reticulate dependencies. 
-Built on direct C++ bindings to the onnxruntime C API, inference runs entirely within R.
+<!-- badges: end -->
 
-nativeORT can run at real-time speeds, and Apple Silicon users can access the CoreML Execution
-Provider. To the author's best research, this is the first R package with direct CoreML access
-which does not rely on reticulate or python bridging.
+The **onnxr** package provides native R access to the [Open Neural
+Network Exchange (ONNX) Runtime](https://onnxruntime.ai), which is a
+performant engine for running machine learning models that are saved to
+a standardized format. Rather than interfacing with ONNX via Python, as
+in the official [onnx](https://cran.r-project.org/package=onnx) R
+package, this package directly interfaces with the runtime’s C++ API via
+[cpp11](https://cran.r-project.org/package=cpp11). This uses far less
+memory and does not require a Python and TensorFlow installation.
 
----
-
-## Why nativeORT?
-
-The existing R interface for ONNX Runtime routes through Python/reticulate with Tensorflow
-backends in Python. Bridging, non-R dependencies, and a large footprint make this a non-ideal
-solution. As of publication, the existing packaging has not had a new release
-since 2021. Additionally, the onnx-tensorflow dependency has not been actively maintained.
-nativeORT exists to bridge this gap for AIML practitioners in R who want a modern,
-R-native approach that runs fast without a large number of dependencies.
-
-<p align="center">
-  <img src="man/figures/comparison.svg" width="600"/>
-</p>
+Models saved to `.onnx` files can be loaded and run on various backends,
+including CPUs and Apple’s CoreML library.
 
 ## Installation
 
-Now available through CRAN!
+You can install the development version of **onnxr** from
+[GitHub](https://github.com/) with:
 
-```
-install.packages('nativeORT')
-```
-
-Or, if you prefer the latest release from Github:
-
-```r
-remotes::install_github("github.com/calebmcarr/nativeort")
+``` r
+# install.packages("pak")
+pak::pak("CoryMcCartan/onnxr")
 ```
 
-nativeORT comes with a smart ONNX Runtime installer to detect your platform and install
-the correct ORT 1.25.1 binary and verify the install. On first install:
+## Getting started
 
-```r
-library(nativeORT)
-ort_install()
-library(nativeORT) # again, with ONNX libraries registered
+On first load of the package, you will need to call `onnx_install()` if
+`libonnxruntime` is not already installed on your system. This will
+download and install the latest version of the ONNX Runtime library,
+which is roughly 35 MB.
+
+``` r
+onnxr::onnx_install()
 ```
 
-After this, you can start inferencing on .onnx engines!
+The package comes with an example `.onnx` GLM model for predicting
+*versicolor* vs *virginica* in the `iris` data.
 
-## Usage
+``` r
+library(onnxr)
 
-### Loading a Model
-
-You'll need access to a .onnx file. Here's we'll use YOLOv11 nano from ultralytics as an
-example.
-
-```r
-session <- nativeORT::ort_model(model_path)
+model_path <- system.file("extdata", "glm_iris.onnx", package = "onnxr")
+model <- onnx_model(model_path)
 ```
 
-### Inferencing
+By default, the model will run on the CPU. Other backends are available
+with the `provider` argument to `onnx_model()`. For example, setting
+`onnx_model(model_path, provider = "coreml")` would load the model to
+run via Apple’s CoreML library on Apple Silicon devices.
 
-Now that you've loaded a model (which handles all of the threading setup, etc.),
-you can inference easily with standard R arrays.
+Printing the model object shows information on the input and output
+arrays.
 
-```r
-# typical RGB 256x256 image
-input <- array(
-  runif(1 * 3 * 256 * 256),
-  dim=c(1L, 3L, 256L, 256L)
-)
-
-raw <- nativeORT::ort_infer_raw(session, input)
+``` r
+model
+#> onnxr model
+#>   model:   /private/var/folders/64/lv8c__115kj6hxqc1f9sq5zr0000gn/T/Rtmpr7nLCV/temp_libpath76a353eefb06/onnxr/extdata/glm_iris.onnx 
+#>   provider: cpu  threads: 1 
+#>   input:  X [?, 4] <float>
+#>   output: label [?] <int64>
+#>   output: probabilities [?, 2] <float>
 ```
 
-### CoreML Access
+The model can be called by using `onnx_run()`, which accepts named or
+positional arguments matching the model’s inputs.
 
-For users with Apple Silicon, nativeORT allows you to tap directly into the CoreML Execution
-Provider, with dedicated hardware for more stable inferencing.
-
-It's easy, only requiring a change in the session creation:
-
-```r
-// optional, explicitly creating cache dir helps speedup
-dir.create(path.expand("~/.nativeORT/cache"),
-           recursive = TRUE, showWarnings = FALSE
-           )
-session <- nativeORT::ort_model(model_path,
-                                  provider='coreml',
-                                  cache_dir=path.expand("~/.nativeORT/cache")
-           )
+``` r
+X = model.matrix(Species ~ 0 + ., data = iris)
+output = onnx_run(model, X = X)
+str(output)
+#> List of 2
+#>  $ label        : num [1:150(1d)] 0 0 0 0 0 0 0 0 0 0 ...
+#>  $ probabilities: num [1:150, 1:2] 1 1 1 1 1 1 1 1 1 1 ...
 ```
 
-### Benchmarks
+See the vignettes for a more involved end-to-end example.
 
-nativeORT is fast, and supports real-time inferencing, opening up video streaming possibilities
-without requiring Python.
+## Prior Art
 
-Below is a benchmark on Apple M1 Silicon, targeting YOLOv11-nano on 50 consecutive 256x256 frames.
-Tested with both the CPU and CoreML providers, we have a median inference time of 7-8 milliseconds, 
-respectively (further discussion at [Benchmark Performance](vignettes/BenchmarkPerformance.Rmd)).
-
-
-<p align="center">
-  <img src="man/figures/benchmark.png" width="600"/>
-</p>
-
-And here are the control charts for latency. Both providers
-are well within our threshold, even when accounting for a 3 sigma interval.Bene Nota: for this chart,
-the warmup was excluded.
-
-<p align="center">
-  <img src="man/figures/control.png" width="600"/>
-</p>
-
-### AI Disclaimer
-
-This code was written by me, and the logic human-made. The charts in this README were aided with the
-help of AI tooling, however, as my eye for graphic design is not quite as keen.
-
-### Author
-
-Caleb Carr is an AI Engineer with an academic background in Applied Statistics.
+This package is based off of the
+[nativeORT](https://cran.r-project.org/package=nativeORT) package by
+[Caleb Carr](https://github.com/calebmcarr).

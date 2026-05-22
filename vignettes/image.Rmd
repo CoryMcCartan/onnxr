@@ -18,16 +18,16 @@ To demonstrate the package in a more realistic setting, we'll show how to run an
 First, we'll download the YOLO26 (You Only Look Once) pretrained model from the Ultralytics repository.
 
 ```{r download}
-model_url = "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n.onnx"
+model_url = "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n-pose.onnx"
 model_path = file.path(tempdir(), "yolo26n.onnx")
 download.file(model_url, model_path, mode = "wb")
 ```
 
 Then we can load the package and load the model.
 ```{r session}
-library(nativeORT)
+library(onnxr)
 
-model = ort_model(model_path)
+model = onnx_model(model_path)
 print(model)
 ```
 
@@ -78,12 +78,12 @@ plot.image <- function(x) {
 plot.image(img)
 ```
 
-To run the model, we simply call `ort_run()` with the session and the input image.
+To run the model, we simply call `onnx_run()` with the session and the input image.
 The `simplify = TRUE` argument tells the function to return the single output array directly, instead of a named list.
 We see that the output contains bounding box coordinates, confidence scores, and object type indices, as expected.
 
 ```{r run}
-res = ort_run(model, img, simplify = TRUE)
+res = onnx_run(model, img, simplify = TRUE)
 dim(res)
 head(res[1, ,])
 ```

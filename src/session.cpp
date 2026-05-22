@@ -7,14 +7,14 @@
 #include "onnxruntime/onnxruntime_cxx_api.h"
 
 [[cpp11::register]]
-SEXP ort_create_env() {
-    ort_check_loaded();
-    Ort::Env* env = new Ort::Env(ORT_LOGGING_LEVEL_WARNING, "nativeORT");
+SEXP onnx_create_env() {
+    onnx_check_loaded();
+    Ort::Env* env = new Ort::Env(ORT_LOGGING_LEVEL_WARNING, "onnxr");
     return cpp11::external_pointer<Ort::Env>(env);
 }
 
 [[cpp11::register]]
-SEXP ort_create_session(SEXP env_ptr,
+SEXP onnx_create_session(SEXP env_ptr,
                         std::string model_path,
                         std::string provider,
                         std::string cache_dir,
@@ -22,7 +22,7 @@ SEXP ort_create_session(SEXP env_ptr,
                         int opt_level,
                         cpp11::strings external_data_files)
 {
-    ort_check_loaded();
+    onnx_check_loaded();
     cpp11::external_pointer<Ort::Env> env(env_ptr);
     Ort::SessionOptions session_options;
 
@@ -104,22 +104,22 @@ SEXP ort_create_session(SEXP env_ptr,
 }
 
 [[cpp11::register]]
-int ort_session_input_count(SEXP session_ptr) {
-    ort_check_loaded();
+int onnx_session_input_count(SEXP session_ptr) {
+    onnx_check_loaded();
     cpp11::external_pointer<Ort::Session> session(session_ptr);
     return session->GetInputCount();
 }
 
 [[cpp11::register]]
-int ort_session_output_count(SEXP session_ptr) {
-    ort_check_loaded();
+int onnx_session_output_count(SEXP session_ptr) {
+    onnx_check_loaded();
     cpp11::external_pointer<Ort::Session> session(session_ptr);
     return session->GetOutputCount();
 }
 
 [[cpp11::register]]
-cpp11::writable::strings ort_session_input_names(SEXP session_ptr) {
-    ort_check_loaded();
+cpp11::writable::strings onnx_session_input_names(SEXP session_ptr) {
+    onnx_check_loaded();
     cpp11::external_pointer<Ort::Session> session(session_ptr);
     Ort::AllocatorWithDefaultOptions allocator;
 
@@ -136,8 +136,8 @@ cpp11::writable::strings ort_session_input_names(SEXP session_ptr) {
 }
 
 [[cpp11::register]]
-cpp11::writable::strings ort_session_output_names(SEXP session_ptr) {
-    ort_check_loaded();
+cpp11::writable::strings onnx_session_output_names(SEXP session_ptr) {
+    onnx_check_loaded();
     cpp11::external_pointer<Ort::Session> session(session_ptr);
     Ort::AllocatorWithDefaultOptions allocator;
 
@@ -182,29 +182,29 @@ static cpp11::writable::integers get_types(Ort::Session* session, size_t count, 
 }
 
 [[cpp11::register]]
-cpp11::writable::list ort_session_input_shapes(SEXP session_ptr) {
-    ort_check_loaded();
+cpp11::writable::list onnx_session_input_shapes(SEXP session_ptr) {
+    onnx_check_loaded();
     cpp11::external_pointer<Ort::Session> session(session_ptr);
     return get_shapes(session.get(), session->GetInputCount(), true);
 }
 
 [[cpp11::register]]
-cpp11::writable::list ort_session_output_shapes(SEXP session_ptr) {
-    ort_check_loaded();
+cpp11::writable::list onnx_session_output_shapes(SEXP session_ptr) {
+    onnx_check_loaded();
     cpp11::external_pointer<Ort::Session> session(session_ptr);
     return get_shapes(session.get(), session->GetOutputCount(), false);
 }
 
 [[cpp11::register]]
-cpp11::writable::integers ort_session_input_types(SEXP session_ptr) {
-    ort_check_loaded();
+cpp11::writable::integers onnx_session_input_types(SEXP session_ptr) {
+    onnx_check_loaded();
     cpp11::external_pointer<Ort::Session> session(session_ptr);
     return get_types(session.get(), session->GetInputCount(), true);
 }
 
 [[cpp11::register]]
-cpp11::writable::integers ort_session_output_types(SEXP session_ptr) {
-    ort_check_loaded();
+cpp11::writable::integers onnx_session_output_types(SEXP session_ptr) {
+    onnx_check_loaded();
     cpp11::external_pointer<Ort::Session> session(session_ptr);
     return get_types(session.get(), session->GetOutputCount(), false);
 }

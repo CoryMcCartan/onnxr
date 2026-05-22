@@ -6,134 +6,134 @@
 #include <R_ext/Visibility.h>
 
 // inference.cpp
-cpp11::writable::list ort_run_(SEXP session_ptr, cpp11::list inputs, cpp11::list input_shapes, cpp11::strings input_names, cpp11::integers input_types, cpp11::strings output_names);
-extern "C" SEXP _nativeORT_ort_run_(SEXP session_ptr, SEXP inputs, SEXP input_shapes, SEXP input_names, SEXP input_types, SEXP output_names) {
+cpp11::writable::list onnx_run_(SEXP session_ptr, cpp11::list inputs, cpp11::list input_shapes, cpp11::strings input_names, cpp11::integers input_types, cpp11::strings output_names);
+extern "C" SEXP _onnxr_onnx_run_(SEXP session_ptr, SEXP inputs, SEXP input_shapes, SEXP input_names, SEXP input_types, SEXP output_names) {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_run_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(inputs), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(input_shapes), cpp11::as_cpp<cpp11::decay_t<cpp11::strings>>(input_names), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(input_types), cpp11::as_cpp<cpp11::decay_t<cpp11::strings>>(output_names)));
-  END_CPP11
-}
-// nativeORT.cpp
-std::string ort_version();
-extern "C" SEXP _nativeORT_ort_version() {
-  BEGIN_CPP11
-    return cpp11::as_sexp(ort_version());
+    return cpp11::as_sexp(onnx_run_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(inputs), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(input_shapes), cpp11::as_cpp<cpp11::decay_t<cpp11::strings>>(input_names), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(input_types), cpp11::as_cpp<cpp11::decay_t<cpp11::strings>>(output_names)));
   END_CPP11
 }
 // ort_loader.cpp
-bool ort_load_lib(std::string path);
-extern "C" SEXP _nativeORT_ort_load_lib(SEXP path) {
+bool onnx_load_lib(std::string path);
+extern "C" SEXP _onnxr_onnx_load_lib(SEXP path) {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_load_lib(cpp11::as_cpp<cpp11::decay_t<std::string>>(path)));
+    return cpp11::as_sexp(onnx_load_lib(cpp11::as_cpp<cpp11::decay_t<std::string>>(path)));
   END_CPP11
 }
 // ort_loader.cpp
-bool ort_is_loaded();
-extern "C" SEXP _nativeORT_ort_is_loaded() {
+bool onnx_is_loaded();
+extern "C" SEXP _onnxr_onnx_is_loaded() {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_is_loaded());
+    return cpp11::as_sexp(onnx_is_loaded());
   END_CPP11
 }
 // ort_loader.cpp
-void ort_unload_lib();
-extern "C" SEXP _nativeORT_ort_unload_lib() {
+void onnx_unload_lib();
+extern "C" SEXP _onnxr_onnx_unload_lib() {
   BEGIN_CPP11
-    ort_unload_lib();
+    onnx_unload_lib();
     return R_NilValue;
   END_CPP11
 }
-// session.cpp
-SEXP ort_create_env();
-extern "C" SEXP _nativeORT_ort_create_env() {
+// ort_loader.cpp
+std::string onnx_version();
+extern "C" SEXP _onnxr_onnx_version() {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_create_env());
+    return cpp11::as_sexp(onnx_version());
   END_CPP11
 }
 // session.cpp
-SEXP ort_create_session(SEXP env_ptr, std::string model_path, std::string provider, std::string cache_dir, int threads, int opt_level, cpp11::strings external_data_files);
-extern "C" SEXP _nativeORT_ort_create_session(SEXP env_ptr, SEXP model_path, SEXP provider, SEXP cache_dir, SEXP threads, SEXP opt_level, SEXP external_data_files) {
+SEXP onnx_create_env();
+extern "C" SEXP _onnxr_onnx_create_env() {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_create_session(cpp11::as_cpp<cpp11::decay_t<SEXP>>(env_ptr), cpp11::as_cpp<cpp11::decay_t<std::string>>(model_path), cpp11::as_cpp<cpp11::decay_t<std::string>>(provider), cpp11::as_cpp<cpp11::decay_t<std::string>>(cache_dir), cpp11::as_cpp<cpp11::decay_t<int>>(threads), cpp11::as_cpp<cpp11::decay_t<int>>(opt_level), cpp11::as_cpp<cpp11::decay_t<cpp11::strings>>(external_data_files)));
+    return cpp11::as_sexp(onnx_create_env());
   END_CPP11
 }
 // session.cpp
-int ort_session_input_count(SEXP session_ptr);
-extern "C" SEXP _nativeORT_ort_session_input_count(SEXP session_ptr) {
+SEXP onnx_create_session(SEXP env_ptr, std::string model_path, std::string provider, std::string cache_dir, int threads, int opt_level, cpp11::strings external_data_files);
+extern "C" SEXP _onnxr_onnx_create_session(SEXP env_ptr, SEXP model_path, SEXP provider, SEXP cache_dir, SEXP threads, SEXP opt_level, SEXP external_data_files) {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_session_input_count(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
+    return cpp11::as_sexp(onnx_create_session(cpp11::as_cpp<cpp11::decay_t<SEXP>>(env_ptr), cpp11::as_cpp<cpp11::decay_t<std::string>>(model_path), cpp11::as_cpp<cpp11::decay_t<std::string>>(provider), cpp11::as_cpp<cpp11::decay_t<std::string>>(cache_dir), cpp11::as_cpp<cpp11::decay_t<int>>(threads), cpp11::as_cpp<cpp11::decay_t<int>>(opt_level), cpp11::as_cpp<cpp11::decay_t<cpp11::strings>>(external_data_files)));
   END_CPP11
 }
 // session.cpp
-int ort_session_output_count(SEXP session_ptr);
-extern "C" SEXP _nativeORT_ort_session_output_count(SEXP session_ptr) {
+int onnx_session_input_count(SEXP session_ptr);
+extern "C" SEXP _onnxr_onnx_session_input_count(SEXP session_ptr) {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_session_output_count(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
+    return cpp11::as_sexp(onnx_session_input_count(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
   END_CPP11
 }
 // session.cpp
-cpp11::writable::strings ort_session_input_names(SEXP session_ptr);
-extern "C" SEXP _nativeORT_ort_session_input_names(SEXP session_ptr) {
+int onnx_session_output_count(SEXP session_ptr);
+extern "C" SEXP _onnxr_onnx_session_output_count(SEXP session_ptr) {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_session_input_names(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
+    return cpp11::as_sexp(onnx_session_output_count(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
   END_CPP11
 }
 // session.cpp
-cpp11::writable::strings ort_session_output_names(SEXP session_ptr);
-extern "C" SEXP _nativeORT_ort_session_output_names(SEXP session_ptr) {
+cpp11::writable::strings onnx_session_input_names(SEXP session_ptr);
+extern "C" SEXP _onnxr_onnx_session_input_names(SEXP session_ptr) {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_session_output_names(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
+    return cpp11::as_sexp(onnx_session_input_names(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
   END_CPP11
 }
 // session.cpp
-cpp11::writable::list ort_session_input_shapes(SEXP session_ptr);
-extern "C" SEXP _nativeORT_ort_session_input_shapes(SEXP session_ptr) {
+cpp11::writable::strings onnx_session_output_names(SEXP session_ptr);
+extern "C" SEXP _onnxr_onnx_session_output_names(SEXP session_ptr) {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_session_input_shapes(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
+    return cpp11::as_sexp(onnx_session_output_names(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
   END_CPP11
 }
 // session.cpp
-cpp11::writable::list ort_session_output_shapes(SEXP session_ptr);
-extern "C" SEXP _nativeORT_ort_session_output_shapes(SEXP session_ptr) {
+cpp11::writable::list onnx_session_input_shapes(SEXP session_ptr);
+extern "C" SEXP _onnxr_onnx_session_input_shapes(SEXP session_ptr) {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_session_output_shapes(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
+    return cpp11::as_sexp(onnx_session_input_shapes(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
   END_CPP11
 }
 // session.cpp
-cpp11::writable::integers ort_session_input_types(SEXP session_ptr);
-extern "C" SEXP _nativeORT_ort_session_input_types(SEXP session_ptr) {
+cpp11::writable::list onnx_session_output_shapes(SEXP session_ptr);
+extern "C" SEXP _onnxr_onnx_session_output_shapes(SEXP session_ptr) {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_session_input_types(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
+    return cpp11::as_sexp(onnx_session_output_shapes(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
   END_CPP11
 }
 // session.cpp
-cpp11::writable::integers ort_session_output_types(SEXP session_ptr);
-extern "C" SEXP _nativeORT_ort_session_output_types(SEXP session_ptr) {
+cpp11::writable::integers onnx_session_input_types(SEXP session_ptr);
+extern "C" SEXP _onnxr_onnx_session_input_types(SEXP session_ptr) {
   BEGIN_CPP11
-    return cpp11::as_sexp(ort_session_output_types(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
+    return cpp11::as_sexp(onnx_session_input_types(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
+  END_CPP11
+}
+// session.cpp
+cpp11::writable::integers onnx_session_output_types(SEXP session_ptr);
+extern "C" SEXP _onnxr_onnx_session_output_types(SEXP session_ptr) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(onnx_session_output_types(cpp11::as_cpp<cpp11::decay_t<SEXP>>(session_ptr)));
   END_CPP11
 }
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
-    {"_nativeORT_ort_create_env",            (DL_FUNC) &_nativeORT_ort_create_env,            0},
-    {"_nativeORT_ort_create_session",        (DL_FUNC) &_nativeORT_ort_create_session,        7},
-    {"_nativeORT_ort_is_loaded",             (DL_FUNC) &_nativeORT_ort_is_loaded,             0},
-    {"_nativeORT_ort_load_lib",              (DL_FUNC) &_nativeORT_ort_load_lib,              1},
-    {"_nativeORT_ort_run_",                  (DL_FUNC) &_nativeORT_ort_run_,                  6},
-    {"_nativeORT_ort_session_input_count",   (DL_FUNC) &_nativeORT_ort_session_input_count,   1},
-    {"_nativeORT_ort_session_input_names",   (DL_FUNC) &_nativeORT_ort_session_input_names,   1},
-    {"_nativeORT_ort_session_input_shapes",  (DL_FUNC) &_nativeORT_ort_session_input_shapes,  1},
-    {"_nativeORT_ort_session_input_types",   (DL_FUNC) &_nativeORT_ort_session_input_types,   1},
-    {"_nativeORT_ort_session_output_count",  (DL_FUNC) &_nativeORT_ort_session_output_count,  1},
-    {"_nativeORT_ort_session_output_names",  (DL_FUNC) &_nativeORT_ort_session_output_names,  1},
-    {"_nativeORT_ort_session_output_shapes", (DL_FUNC) &_nativeORT_ort_session_output_shapes, 1},
-    {"_nativeORT_ort_session_output_types",  (DL_FUNC) &_nativeORT_ort_session_output_types,  1},
-    {"_nativeORT_ort_unload_lib",            (DL_FUNC) &_nativeORT_ort_unload_lib,            0},
-    {"_nativeORT_ort_version",               (DL_FUNC) &_nativeORT_ort_version,               0},
+    {"_onnxr_onnx_create_env",            (DL_FUNC) &_onnxr_onnx_create_env,            0},
+    {"_onnxr_onnx_create_session",        (DL_FUNC) &_onnxr_onnx_create_session,        7},
+    {"_onnxr_onnx_is_loaded",             (DL_FUNC) &_onnxr_onnx_is_loaded,             0},
+    {"_onnxr_onnx_load_lib",              (DL_FUNC) &_onnxr_onnx_load_lib,              1},
+    {"_onnxr_onnx_run_",                  (DL_FUNC) &_onnxr_onnx_run_,                  6},
+    {"_onnxr_onnx_session_input_count",   (DL_FUNC) &_onnxr_onnx_session_input_count,   1},
+    {"_onnxr_onnx_session_input_names",   (DL_FUNC) &_onnxr_onnx_session_input_names,   1},
+    {"_onnxr_onnx_session_input_shapes",  (DL_FUNC) &_onnxr_onnx_session_input_shapes,  1},
+    {"_onnxr_onnx_session_input_types",   (DL_FUNC) &_onnxr_onnx_session_input_types,   1},
+    {"_onnxr_onnx_session_output_count",  (DL_FUNC) &_onnxr_onnx_session_output_count,  1},
+    {"_onnxr_onnx_session_output_names",  (DL_FUNC) &_onnxr_onnx_session_output_names,  1},
+    {"_onnxr_onnx_session_output_shapes", (DL_FUNC) &_onnxr_onnx_session_output_shapes, 1},
+    {"_onnxr_onnx_session_output_types",  (DL_FUNC) &_onnxr_onnx_session_output_types,  1},
+    {"_onnxr_onnx_unload_lib",            (DL_FUNC) &_onnxr_onnx_unload_lib,            0},
+    {"_onnxr_onnx_version",               (DL_FUNC) &_onnxr_onnx_version,               0},
     {NULL, NULL, 0}
 };
 }
 
-extern "C" attribute_visible void R_init_nativeORT(DllInfo* dll){
+extern "C" attribute_visible void R_init_onnxr(DllInfo* dll){
   R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
   R_useDynamicSymbols(dll, FALSE);
   R_forceSymbols(dll, TRUE);

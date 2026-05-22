@@ -16,21 +16,21 @@
 #' @param opt_level Graph optimization level. `99` (default) enables all
 #'   optimizations; `1` for basic only; `0` to disable.
 #'
-#' @returns An `"ort_model"` object (a named list) with model metadata
-#'   and internal pointers used by [ort_run()].
+#' @returns An `"onnx_model"` object (a named list) with model metadata
+#'   and internal pointers used by [onnx_run()].
 #' @export
 #'
 #' @examples \donttest{
-#' model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
-#' if (ort_is_loaded() && nzchar(model_path)) {
-#'     sess <- ort_model(model_path)
+#' model_path <- system.file("extdata", "lm_iris.onnx", package = "onnxr")
+#' if (onnx_is_loaded() && nzchar(model_path)) {
+#'     sess <- onnx_model(model_path)
 #'     sess
 #' }
 #' }
-ort_model <- function(
+onnx_model <- function(
     path,
     provider = c("cpu", "coreml", "cuda", "xnnpack", "openvino"),
-    cache_dir = tools::R_user_dir("nativeORT", "cache"),
+    cache_dir = tools::R_user_dir("onnxr", "cache"),
     threads = 1L,
     opt_level = 99L
 ) {
@@ -57,11 +57,10 @@ ort_model <- function(
     # These are pre-loaded into memory so that non-CPU providers
     # (especially CoreML) can access them without resolving relative paths.
     model_dir <- dirname(model_path)
-    external_data <- list.files(model_dir, pattern = "[.]onnx_data$",
-        full.names = TRUE)
+    external_data <- list.files(model_dir, pattern = "[.]onnx_data$", full.names = TRUE)
 
-    env <- ort_create_env()
-    sess <- ort_create_session(
+    env <- onnx_create_env()
+    sess <- onnx_create_session(
         env_ptr = env,
         model_path = model_path,
         provider = provider,
@@ -71,10 +70,10 @@ ort_model <- function(
         external_data_files = external_data
     )
 
-    input_shapes <- ort_session_input_shapes(sess)
-    output_shapes <- ort_session_output_shapes(sess)
-    input_names <- ort_session_input_names(sess)
-    output_names <- ort_session_output_names(sess)
+    input_shapes <- onnx_session_input_shapes(sess)
+    output_shapes <- onnx_session_output_shapes(sess)
+    input_names <- onnx_session_input_names(sess)
+    output_names <- onnx_session_output_names(sess)
     names(input_shapes) <- input_names
     names(output_shapes) <- output_names
 
@@ -88,19 +87,19 @@ ort_model <- function(
             opt_level = as.integer(opt_level),
             input_names = input_names,
             output_names = output_names,
-            n_inputs = ort_session_input_count(sess),
-            n_outputs = ort_session_output_count(sess),
+            n_inputs = onnx_session_input_count(sess),
+            n_outputs = onnx_session_output_count(sess),
             input_shapes = input_shapes,
             output_shapes = output_shapes,
-            input_types = ort_session_input_types(sess),
-            output_types = ort_session_output_types(sess)
+            input_types = onnx_session_input_types(sess),
+            output_types = onnx_session_output_types(sess)
         ),
-        class = "ort_model"
+        class = "onnx_model"
     )
 }
 
 # Map ORT element type codes to human-readable names
-.ort_type_names <- c(
+.onnx_type_names <- c(
     "undefined",
     "float",
     "uint8",
@@ -116,10 +115,10 @@ ort_model <- function(
     "uint32",
     "uint64"
 )
-.ort_type_name <- function(code) {
+.onnx_type_name <- function(code) {
     ifelse(
-        code >= 0L & code < length(.ort_type_names),
-        .ort_type_names[code + 1L],
+        code >= 0L & code < length(.onnx_type_names),
+        .onnx_type_names[code + 1L],
         paste0("type(", code, ")")
     )
 }
@@ -132,8 +131,8 @@ ort_model <- function(
 
 
 #' @export
-print.ort_model <- function(x, ...) {
-    cat("nativeORT model\n")
+print.onnx_model <- function(x, ...) {
+    cat("onnxr model\n")
     cat("  model:  ", x$path, "\n")
     cat("  provider:", x$provider, " threads:", ifelse(x$threads == 0, "auto", x$threads), "\n")
     for (i in seq_len(x$n_inputs)) {
@@ -141,7 +140,7 @@ print.ort_model <- function(x, ...) {
             "  input:  %s %s <%s>\n",
             x$input_names[i],
             .fmt_shape(x$input_shapes[[i]]),
-            .ort_type_name(x$input_types[i])
+            .onnx_type_name(x$input_types[i])
         ))
     }
     for (i in seq_len(x$n_outputs)) {
@@ -149,7 +148,7 @@ print.ort_model <- function(x, ...) {
             "  output: %s %s <%s>\n",
             x$output_names[i],
             .fmt_shape(x$output_shapes[[i]]),
-            .ort_type_name(x$output_types[i])
+            .onnx_type_name(x$output_types[i])
         ))
     }
     invisible(x)

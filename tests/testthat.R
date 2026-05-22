@@ -1,4 +1,4 @@
 library(testthat)
-library(nativeORT)
+library(onnxr)
 
-test_check("nativeORT")
+test_check("onnxr")

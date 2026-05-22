@@ -226,7 +226,7 @@ static SEXP read_output_tensor(Ort::Value& tensor) {
 // ---- Main inference function ----
 
 [[cpp11::register]]
-cpp11::writable::list ort_run_(
+cpp11::writable::list onnx_run_(
     SEXP session_ptr,
     cpp11::list inputs,
     cpp11::list input_shapes,
@@ -234,7 +234,7 @@ cpp11::writable::list ort_run_(
     cpp11::integers input_types,
     cpp11::strings output_names
 ) {
-    ort_check_loaded();
+    onnx_check_loaded();
     cpp11::external_pointer<Ort::Session> session(session_ptr);
 
     Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(
@@ -291,9 +291,12 @@ cpp11::writable::list ort_run_(
 
     // Read outputs
     cpp11::writable::list results(n_outputs);
+    cpp11::writable::strings result_names(n_outputs);
     for (size_t i = 0; i < n_outputs; i++) {
         results[i] = read_output_tensor(output_tensors[i]);
+        result_names[i] = output_names[i];
     }
+    results.names() = result_names;
 
     return results;
 }

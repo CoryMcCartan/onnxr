@@ -1,0 +1,80 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# onnxr
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The **onnxr** package provides native R access to the [Open Neural Network
+Exchange (ONNX) Runtime](https://onnxruntime.ai), which is a performant engine
+for running machine learning models that are saved to a standardized format.
+Rather than interfacing with ONNX via Python, as in the official
+[onnx](https://cran.r-project.org/package=onnx) R package, this package directly
+interfaces with the runtime's C++ API via [cpp11](https://cran.r-project.org/package=cpp11). This uses far less memory and does not require a Python and
+TensorFlow installation.
+
+Models saved to `.onnx` files can be loaded and run on various backends,
+including CPUs and Apple's CoreML library.
+
+## Installation
+
+You can install the development version of **onnxr** from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("pak")
+pak::pak("CoryMcCartan/onnxr")
+```
+
+## Getting started
+
+On first load of the package, you will need to call `onnx_install()` if
+`libonnxruntime` is not already installed on your system.
+This will download and install the latest version of the ONNX Runtime library, which is roughly 35 MB.
+
+```{r eval=FALSE}
+onnxr::onnx_install()
+```
+
+The package comes with an example `.onnx` GLM model for predicting *versicolor* vs *virginica* in the `iris` data.
+
+```{r load}
+library(onnxr)
+
+model_path <- system.file("extdata", "glm_iris.onnx", package = "onnxr")
+model <- onnx_model(model_path)
+```
+
+By default, the model will run on the CPU.
+Other backends are available with the `provider` argument to `onnx_model()`.
+For example, setting `onnx_model(model_path, provider = "coreml")` would load the model to run via Apple's CoreML library on Apple Silicon devices.
+
+Printing the model object shows information on the input and output arrays.
+```{r}
+model
+```
+
+The model can be called by using `onnx_run()`, which accepts named or positional arguments matching the model's inputs.
+```{r predict}
+X = model.matrix(Species ~ 0 + ., data = iris)
+output = onnx_run(model, X = X)
+str(output)
+```
+
+See the vignettes for a more involved end-to-end example.
+
+## Prior Art
+
+This package is based off of the [nativeORT](https://cran.r-project.org/package=nativeORT) package by [Caleb Carr](https://github.com/calebmcarr).

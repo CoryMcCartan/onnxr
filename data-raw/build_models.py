@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build ONNX test models for nativeORT package.
+"""Build ONNX test models for onnxr package.
 
 Requirements: numpy, scikit-learn, skl2onnx, onnxruntime
     pip install numpy scikit-learn skl2onnx onnxruntime
