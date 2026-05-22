@@ -24,7 +24,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
-URL: https://corymccartan.com/onnxr, https://github.com/CoryMcCartan/onnxr
+URL: https://corymccartan.com/onnxr/, https://github.com/CoryMcCartan/onnxr
 BugReports: https://github.com/CoryMcCartan/onnxr/issues
 Language: en-US
 Encoding: UTF-8
