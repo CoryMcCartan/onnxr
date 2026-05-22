@@ -5,6 +5,7 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/CoryMcCartan/onnxr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CoryMcCartan/onnxr/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The **onnxr** package provides native R access to the [Open Neural
@@ -61,8 +62,8 @@ arrays.
 ``` r
 model
 #> onnxr model
-#>   model:   /private/var/folders/64/lv8c__115kj6hxqc1f9sq5zr0000gn/T/Rtmpr7nLCV/temp_libpath76a353eefb06/onnxr/extdata/glm_iris.onnx 
-#>   provider: cpu  threads: 1 
+#>   model:   /private/var/folders/64/lv8c__115kj6hxqc1f9sq5zr0000gn/T/Rtmp8PRFoT/temp_libpath7a59105d9304/onnxr/extdata/glm_iris.onnx 
+#>   backend: cpu  threads: 1 
 #>   input:  X [?, 4] <float>
 #>   output: label [?] <int64>
 #>   output: probabilities [?, 2] <float>
