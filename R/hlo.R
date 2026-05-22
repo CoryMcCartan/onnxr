@@ -14,7 +14,7 @@
 #' @export
 #'
 #' @examples \dontrun{
-#' func <- onnx_to_hlo(system.file("extdata", "lm_iris.onnx", package = "nativeORT"))
+#' func <- onnx_to_hlo(system.file("extdata", "lm_iris.onnx", package = "onnxr"))
 #' cat(stablehlo::repr(func))
 #' }
 onnx_to_hlo <- function(path, batch_size = 1L) {

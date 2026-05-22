@@ -1,7 +1,7 @@
 skip_if_not_installed("stablehlo")
 
 test_that("onnx_to_hlo converts linear regression model", {
-    model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
+    model_path <- system.file("extdata", "lm_iris.onnx", package = "onnxr")
     skip_if(model_path == "", "Test model not found")
 
     func <- onnx_to_hlo(model_path)
@@ -19,7 +19,7 @@ test_that("onnx_to_hlo converts linear regression model", {
 })
 
 test_that("onnx_to_hlo converts logistic regression model", {
-    model_path <- system.file("extdata", "glm_iris.onnx", package = "nativeORT")
+    model_path <- system.file("extdata", "glm_iris.onnx", package = "onnxr")
     skip_if(model_path == "", "Test model not found")
 
     func <- onnx_to_hlo(model_path)
@@ -42,7 +42,7 @@ test_that("onnx_to_hlo errors on unsupported ops", {
 })
 
 test_that("ort_read_graph extracts graph structure", {
-    model_path <- system.file("extdata", "lm_iris.onnx", package = "nativeORT")
+    model_path <- system.file("extdata", "lm_iris.onnx", package = "onnxr")
     skip_if(model_path == "", "Test model not found")
 
     g <- ort_read_graph(normalizePath(model_path))

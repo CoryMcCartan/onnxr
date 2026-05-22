@@ -24,7 +24,7 @@ function can be serialized with \code{\link[stablehlo:repr]{stablehlo::repr()}} 
 }
 \examples{
 \dontrun{
-func <- onnx_to_hlo(system.file("extdata", "lm_iris.onnx", package = "nativeORT"))
+func <- onnx_to_hlo(system.file("extdata", "lm_iris.onnx", package = "onnxr"))
 cat(stablehlo::repr(func))
 }
 }

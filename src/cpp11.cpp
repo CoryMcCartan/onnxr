@@ -5,6 +5,13 @@
 #include "cpp11/declarations.hpp"
 #include <R_ext/Visibility.h>
 
+// graph.cpp
+cpp11::writable::list ort_read_graph(std::string model_path);
+extern "C" SEXP _onnxr_ort_read_graph(SEXP model_path) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(ort_read_graph(cpp11::as_cpp<cpp11::decay_t<std::string>>(model_path)));
+  END_CPP11
+}
 // inference.cpp
 cpp11::writable::list onnx_run_(SEXP session_ptr, cpp11::list inputs, cpp11::list input_shapes, cpp11::strings input_names, cpp11::integers input_types, cpp11::strings output_names);
 extern "C" SEXP _onnxr_onnx_run_(SEXP session_ptr, SEXP inputs, SEXP input_shapes, SEXP input_names, SEXP input_types, SEXP output_names) {
@@ -129,6 +136,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_onnxr_onnx_session_output_types",  (DL_FUNC) &_onnxr_onnx_session_output_types,  1},
     {"_onnxr_onnx_unload_lib",            (DL_FUNC) &_onnxr_onnx_unload_lib,            0},
     {"_onnxr_onnx_version",               (DL_FUNC) &_onnxr_onnx_version,               0},
+    {"_onnxr_ort_read_graph",             (DL_FUNC) &_onnxr_ort_read_graph,             1},
     {NULL, NULL, 0}
 };
 }
