@@ -9,7 +9,7 @@
 #'   - `"coreml"` — Apple Neural Engine + CPU (macOS/iOS only).
 #'   - `"cuda"` — NVIDIA GPU (Linux x64 and Windows x64 only). Requires
 #'     CUDA toolkit and the CUDA-enabled ORT build from
-#'     [onnx_install]`(cuda = TRUE)`.
+#'     `onnx_install(cuda = TRUE)`.
 #'   - `"xnnpack"` — Optimized CPU kernels (mobile/embedded). Requires
 #'     an ORT build with XNNPACK support (not provided by [onnx_install()]).
 #'   - `"openvino"` — Intel hardware acceleration. Requires OpenVINO

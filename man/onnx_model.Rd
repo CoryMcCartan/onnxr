@@ -22,7 +22,7 @@ platform and ORT build:
 \item \code{"coreml"} — Apple Neural Engine + CPU (macOS/iOS only).
 \item \code{"cuda"} — NVIDIA GPU (Linux x64 and Windows x64 only). Requires
 CUDA toolkit and the CUDA-enabled ORT build from
-\link{onnx_install}\code{(cuda = TRUE)}.
+\code{onnx_install(cuda = TRUE)}.
 \item \code{"xnnpack"} — Optimized CPU kernels (mobile/embedded). Requires
 an ORT build with XNNPACK support (not provided by \code{\link[=onnx_install]{onnx_install()}}).
 \item \code{"openvino"} — Intel hardware acceleration. Requires OpenVINO
