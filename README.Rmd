@@ -32,7 +32,13 @@ including CPUs and Apple's CoreML library.
 
 ## Installation
 
-You can install the development version of **onnxr** from [GitHub](https://github.com/) with:
+You can install **onnxr** from [CRAN](https://cran.r-project.org/package=onnxr) with:
+
+``` r
+install.packages("onnxr")
+```
+
+Or install the development version from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("pak")
