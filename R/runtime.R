@@ -225,7 +225,7 @@ onnx_codesign <- function(lib_dir) {
         ret <- system2(
             "codesign",
             c("--force", "--deep", "--sign", "-", shQuote(lib)),
-            stderr = TRUE
+            stdout = TRUE, stderr = TRUE
         )
         if (!is.null(attr(ret, "status"))) {
             warning("codesign failed for ", basename(lib), ": ", paste(ret, collapse = "\n"))

@@ -52,7 +52,9 @@ SEXP onnx_create_session(SEXP env_ptr,
             std::string fpath(external_data_files[i]);
             // Use basename only — must match the 'location' field in the protobuf
             std::string fname = fpath.substr(fpath.find_last_of("/\\") + 1);
-            file_names.push_back(fname);
+            file_names.push_back(
+                std::basic_string<ORTCHAR_T>(fname.begin(), fname.end()));
+
 
             std::ifstream ifs(fpath, std::ios::binary | std::ios::ate);
             if (!ifs) {
@@ -94,9 +96,10 @@ SEXP onnx_create_session(SEXP env_ptr,
         session_options.AppendExecutionProvider(ort_name, options);
     }
 
+    std::basic_string<ORTCHAR_T> ort_path(model_path.begin(), model_path.end());
     Ort::Session* session = new Ort::Session(
         *env,
-        model_path.c_str(),
+        ort_path.c_str(),
         session_options
     );
 
