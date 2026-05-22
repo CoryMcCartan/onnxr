@@ -49,9 +49,24 @@ immediately after installation, so there is no need to restart R.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">onnx_install</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">onnx_install</span><span class="op">(</span>cuda <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
+
+
+<dl><dt id="arg-cuda">cuda<a class="anchor" aria-label="anchor" href="#arg-cuda"></a></dt>
+<dd><p>Whether to install the CUDA-enabled build for GPU acceleration.</p><ul><li><p><code>NULL</code> (default): auto-detect by checking for <code>nvidia-smi</code> on the
+system <code>PATH</code>. Installs the CUDA build if a GPU is found and the
+platform is supported (Linux x64 or Windows x64), otherwise falls
+back to the CPU build.</p></li>
+<li><p><code>TRUE</code>: force the CUDA build. Errors if the platform is not
+Linux x64 or Windows x64.</p></li>
+<li><p><code>FALSE</code>: always install the CPU-only build.</p></li>
+</ul></dd>
+
+</dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Invisibly, the path to the installation directory.</p>
@@ -61,6 +76,7 @@ immediately after installation, so there is no need to restart R.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="fu">onnx_install</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">onnx_install</span><span class="op">(</span>cuda <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

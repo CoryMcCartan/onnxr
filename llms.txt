@@ -97,7 +97,7 @@ This package is based off of the
 - [`onnx_model()`](http://corymccartan.com/onnxr/reference/onnx_model.md)
   : Load an ONNX model
 - [`onnx_run()`](http://corymccartan.com/onnxr/reference/onnx_run.md) :
-  Run inference on an ONNX model
+  Run or predict from an ONNX model
 
 ## Manage the ONNX runtime
 

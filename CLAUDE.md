@@ -48,7 +48,7 @@ using sklearn + skl2onnx. Tests skip automatically if ORT is not loaded.
 
 ## Exported API
 
-- `onnx_model(path, provider, ...)` — Load an ONNX model. Returns an S3
+- `onnx_model(path, backend, ...)` — Load an ONNX model. Returns an S3
   object with model metadata (shapes, types, names).
 - `onnx_run(session, input)` — Run inference. Validates input
   dimensions, handles all outputs. Returns array (single output) or
@@ -111,9 +111,9 @@ before using ORT.
 
 ### R Layer (R/)
 
-- **session.R** — `onnx_model(path, provider)` wraps C++ session
-  creation. Stores shapes, types, names on the S3 object.
-  `print.onnx_model()` shows input/output metadata.
+- **model.R** — `onnx_model(path, backend)` wraps C++ session creation.
+  Stores shapes, types, names on the S3 object. `print.onnx_model()`
+  shows input/output metadata.
 - **run.R** — `onnx_run(session, input)` validates input dimensions
   against declared shapes, runs inference on all outputs, returns array
   (single output) or named list (multi-output).

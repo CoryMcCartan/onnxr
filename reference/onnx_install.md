@@ -7,8 +7,24 @@ immediately after installation, so there is no need to restart R.
 ## Usage
 
 ``` r
-onnx_install()
+onnx_install(cuda = NULL)
 ```
+
+## Arguments
+
+- cuda:
+
+  Whether to install the CUDA-enabled build for GPU acceleration.
+
+  - `NULL` (default): auto-detect by checking for `nvidia-smi` on the
+    system `PATH`. Installs the CUDA build if a GPU is found and the
+    platform is supported (Linux x64 or Windows x64), otherwise falls
+    back to the CPU build.
+
+  - `TRUE`: force the CUDA build. Errors if the platform is not Linux
+    x64 or Windows x64.
+
+  - `FALSE`: always install the CPU-only build.
 
 ## Value
 
@@ -19,5 +35,6 @@ Invisibly, the path to the installation directory.
 ``` r
 if (FALSE) { # \dontrun{
 onnx_install()
+onnx_install(cuda = TRUE)
 } # }
 ```

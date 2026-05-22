@@ -73,7 +73,7 @@
 <div class="section level2">
 <h2 id="exported-api">Exported API<a class="anchor" aria-label="anchor" href="#exported-api"></a></h2>
 <ul><li>
-<code>onnx_model(path, provider, ...)</code> — Load an ONNX model. Returns an S3 object with model metadata (shapes, types, names).</li>
+<code>onnx_model(path, backend, ...)</code> — Load an ONNX model. Returns an S3 object with model metadata (shapes, types, names).</li>
 <li>
 <code>onnx_run(session, input)</code> — Run inference. Validates input dimensions, handles all outputs. Returns array (single output) or named list (multi-output).</li>
 <li>
@@ -111,7 +111,7 @@
 <div class="section level3">
 <h3 id="r-layer-r">R Layer (R/)<a class="anchor" aria-label="anchor" href="#r-layer-r"></a></h3>
 <ul><li>
-<strong>session.R</strong> — <code>onnx_model(path, provider)</code> wraps C++ session creation. Stores shapes, types, names on the S3 object. <code>print.onnx_model()</code> shows input/output metadata.</li>
+<strong>model.R</strong> — <code>onnx_model(path, backend)</code> wraps C++ session creation. Stores shapes, types, names on the S3 object. <code>print.onnx_model()</code> shows input/output metadata.</li>
 <li>
 <strong>run.R</strong> — <code>onnx_run(session, input)</code> validates input dimensions against declared shapes, runs inference on all outputs, returns array (single output) or named list (multi-output).</li>
 <li>

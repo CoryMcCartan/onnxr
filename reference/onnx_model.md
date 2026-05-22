@@ -1,14 +1,13 @@
 # Load an ONNX model
 
-Loads an `.onnx` model file and creates a model object for running
-inference.
+Loads an `.onnx` model file and creates a model object.
 
 ## Usage
 
 ``` r
 onnx_model(
   path,
-  provider = c("cpu", "coreml", "cuda", "xnnpack", "openvino"),
+  backend = c("cpu", "coreml", "cuda", "xnnpack", "openvino"),
   cache_dir = tools::R_user_dir("onnxr", "cache"),
   threads = 1L,
   opt_level = 99L
@@ -21,20 +20,26 @@ onnx_model(
 
   Path to an `.onnx` model file.
 
-- provider:
+- backend:
 
-  Execution provider. Available options depend on the platform and ORT
+  Execution backend. Available options depend on the platform and ORT
   build:
 
   - `"cpu"` — Default, available everywhere.
 
   - `"coreml"` — Apple Neural Engine + CPU (macOS/iOS only).
 
-  - `"cuda"` — NVIDIA GPU (requires CUDA-enabled ORT build).
+  - `"cuda"` — NVIDIA GPU (Linux x64 and Windows x64 only). Requires
+    CUDA toolkit and the CUDA-enabled ORT build from
+    [onnx_install](http://corymccartan.com/onnxr/reference/onnx_install.md)`(cuda = TRUE)`.
 
-  - `"xnnpack"` — Optimized CPU kernels (mobile/embedded).
+  - `"xnnpack"` — Optimized CPU kernels (mobile/embedded). Requires an
+    ORT build with XNNPACK support (not provided by
+    [`onnx_install()`](http://corymccartan.com/onnxr/reference/onnx_install.md)).
 
-  - `"openvino"` — Intel hardware acceleration.
+  - `"openvino"` — Intel hardware acceleration. Requires OpenVINO
+    installation and ORT build with OpenVINO EP (not provided by
+    [`onnx_install()`](http://corymccartan.com/onnxr/reference/onnx_install.md)).
 
 - cache_dir:
 
@@ -68,7 +73,7 @@ if (onnx_is_loaded() && nzchar(model_path)) {
 }
 #> onnxr model
 #>   model:   /home/runner/work/_temp/Library/onnxr/extdata/lm_iris.onnx 
-#>   provider: cpu  threads: 1 
+#>   backend: cpu  threads: 1 
 #>   input:  X [?, 3] <float>
 #>   output: variable [?, 1] <float>
 # }
