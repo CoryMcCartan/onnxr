@@ -1,4 +1,4 @@
-#' Run inference on an ONNX model
+#' Run or predict from an ONNX model
 #'
 #' Passes `input` through the model and returns the results. For models
 #' with a single output, returns the output array directly. For models
@@ -6,7 +6,8 @@
 #'
 #' Handles conversion between R's column-major arrays and ONNX's
 #' row-major tensors, and between R's numeric types and the model's
-#' declared element types (float, double, int32, int64).
+#' declared element types (float, double, int32, int64). Note that int64 outputs
+#' are cast to doubles, which may lose precision for large integers.
 #'
 #' @param model An `"onnx_model"` object created by [onnx_model()].
 #' @param ... Input arrays, either as unnamed arguments (matched to model

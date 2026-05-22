@@ -4,7 +4,19 @@
 \alias{onnx_install}
 \title{Install ONNX Runtime}
 \usage{
-onnx_install()
+onnx_install(cuda = NULL)
+}
+\arguments{
+\item{cuda}{Whether to install the CUDA-enabled build for GPU acceleration.
+\itemize{
+\item \code{NULL} (default): auto-detect by checking for \code{nvidia-smi} on the
+system \code{PATH}. Installs the CUDA build if a GPU is found and the
+platform is supported (Linux x64 or Windows x64), otherwise falls
+back to the CPU build.
+\item \code{TRUE}: force the CUDA build. Errors if the platform is not
+Linux x64 or Windows x64.
+\item \code{FALSE}: always install the CPU-only build.
+}}
 }
 \value{
 Invisibly, the path to the installation directory.
@@ -17,5 +29,6 @@ immediately after installation, so there is no need to restart R.
 \examples{
 \dontrun{
 onnx_install()
+onnx_install(cuda = TRUE)
 }
 }

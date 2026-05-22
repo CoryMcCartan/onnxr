@@ -93,25 +93,48 @@ onnx_find_lib <- function() {
 #' and installs them to a per-user data directory. The library is loaded
 #' immediately after installation, so there is no need to restart R.
 #'
+#' @param cuda Whether to install the CUDA-enabled build for GPU acceleration.
+#'   - `NULL` (default): auto-detect by checking for `nvidia-smi` on the
+#'     system `PATH`. Installs the CUDA build if a GPU is found and the
+#'     platform is supported (Linux x64 or Windows x64), otherwise falls
+#'     back to the CPU build.
+#'   - `TRUE`: force the CUDA build. Errors if the platform is not
+#'     Linux x64 or Windows x64.
+#'   - `FALSE`: always install the CPU-only build.
+#'
 #' @returns Invisibly, the path to the installation directory.
 #' @export
 #'
 #' @examples \dontrun{
 #' onnx_install()
+#' onnx_install(cuda = TRUE)
 #' }
-onnx_install <- function() {
+onnx_install <- function(cuda = NULL) {
     if (onnx_is_installed()) {
         message("onnxruntime ", .onnx_version, " is already installed.")
         return(invisible(onnx_install_dir()))
     }
 
     os <- onnx_detect_os()
-    url <- onnx_binary_url()
+
+    if (is.null(cuda)) {
+        cuda <- os %in% c("linux-x64", "win-x64") && nzchar(Sys.which("nvidia-smi"))
+        if (cuda) message("NVIDIA GPU detected; installing CUDA build.")
+    }
+
+    if (cuda && !os %in% c("linux-x64", "win-x64")) {
+        stop("CUDA builds are only available for Linux x64 and Windows x64, ",
+             "not ", os)
+    }
+
+    url <- onnx_binary_url(cuda = cuda)
     dest <- onnx_install_dir()
 
     onnx_download(url, dest)
 
-    extracted <- file.path(dest, paste0("onnxruntime-", os, "-", .onnx_version))
+    # The extracted directory name includes "-gpu" for CUDA builds
+    dir_suffix <- if (cuda) paste0(os, "-gpu") else os
+    extracted <- file.path(dest, paste0("onnxruntime-", dir_suffix, "-", .onnx_version))
     if (!all(file.copy(file.path(extracted, "include"), dest, recursive = TRUE))) {
         stop("Failed to copy ONNX Runtime include files to ", dest)
     }
@@ -124,7 +147,9 @@ onnx_install <- function() {
         onnx_codesign(file.path(dest, "lib"))
     }
 
-    message("onnxruntime ", .onnx_version, " installed successfully.")
+    message("onnxruntime ", .onnx_version,
+            if (cuda) " (CUDA)" else "",
+            " installed successfully.")
     message("location: ", dest)
 
     # Load the library immediately so it's available without restarting R
@@ -180,10 +205,12 @@ onnx_install_dir <- function() {
 }
 
 # Construct the GitHub release URL for the current platform and ORT version.
-onnx_binary_url <- function() {
+onnx_binary_url <- function(cuda = FALSE) {
     os <- onnx_detect_os()
     base <- "https://github.com/microsoft/onnxruntime/releases/download"
-    paste0(base, "/v", .onnx_version, "/onnxruntime-", os, "-", .onnx_version, ".tgz")
+    gpu_suffix <- if (cuda) "-gpu" else ""
+    ext <- if (os == "win-x64") ".zip" else ".tgz"
+    paste0(base, "/v", .onnx_version, "/onnxruntime-", os, gpu_suffix, "-", .onnx_version, ext)
 }
 
 # Sign downloaded dylibs on macOS to satisfy Gatekeeper.
@@ -207,17 +234,21 @@ onnx_codesign <- function(lib_dir) {
     invisible(lib_dir)
 }
 
-# Download an ORT release tarball.
+# Download and extract an ORT release archive.
 onnx_download <- function(url, dest_dir) {
     dir.create(dest_dir, recursive = TRUE, showWarnings = FALSE)
-    tgz_path <- file.path(dest_dir, basename(url))
+    archive_path <- file.path(dest_dir, basename(url))
 
     message("Downloading ONNX Runtime ", .onnx_version, "...")
-    utils::download.file(url, tgz_path, mode = "wb")
+    utils::download.file(url, archive_path, mode = "wb")
 
     message("Extracting...")
-    utils::untar(tgz_path, exdir = dest_dir)
-    unlink(tgz_path)
+    if (grepl("\\.zip$", archive_path)) {
+        utils::unzip(archive_path, exdir = dest_dir)
+    } else {
+        utils::untar(archive_path, exdir = dest_dir)
+    }
+    unlink(archive_path)
 
     invisible(dest_dir)
 }

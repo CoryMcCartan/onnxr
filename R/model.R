@@ -1,15 +1,19 @@
 #' Load an ONNX model
 #'
-#' Loads an `.onnx` model file and creates a model object for running inference.
+#' Loads an `.onnx` model file and creates a model object.
 #'
 #' @param path Path to an `.onnx` model file.
-#' @param provider Execution provider. Available options depend on the
+#' @param backend Execution backend. Available options depend on the
 #'   platform and ORT build:
 #'   - `"cpu"` — Default, available everywhere.
 #'   - `"coreml"` — Apple Neural Engine + CPU (macOS/iOS only).
-#'   - `"cuda"` — NVIDIA GPU (requires CUDA-enabled ORT build).
-#'   - `"xnnpack"` — Optimized CPU kernels (mobile/embedded).
-#'   - `"openvino"` — Intel hardware acceleration.
+#'   - `"cuda"` — NVIDIA GPU (Linux x64 and Windows x64 only). Requires
+#'     CUDA toolkit and the CUDA-enabled ORT build from
+#'     [onnx_install]`(cuda = TRUE)`.
+#'   - `"xnnpack"` — Optimized CPU kernels (mobile/embedded). Requires
+#'     an ORT build with XNNPACK support (not provided by [onnx_install()]).
+#'   - `"openvino"` — Intel hardware acceleration. Requires OpenVINO
+#'     installation and ORT build with OpenVINO EP (not provided by [onnx_install()]).
 #' @param cache_dir Optional directory for CoreML model cache. Set to `NULL` to disable caching.
 #' @param threads Number of threads. `0` uses all available;
 #'   a positive integer sets a fixed thread count.
@@ -29,21 +33,21 @@
 #' }
 onnx_model <- function(
     path,
-    provider = c("cpu", "coreml", "cuda", "xnnpack", "openvino"),
+    backend = c("cpu", "coreml", "cuda", "xnnpack", "openvino"),
     cache_dir = tools::R_user_dir("onnxr", "cache"),
     threads = 1L,
     opt_level = 99L
 ) {
-    provider <- match.arg(provider)
+    backend <- match.arg(backend)
     if (!file.exists(path)) {
         stop("Model file not found")
     }
     if (!grepl("\\.onnx$", path, ignore.case = TRUE)) {
         stop("File must be an .onnx model")
     }
-    if (provider == "coreml" && Sys.info()[["sysname"]] != "Darwin") {
+    if (backend == "coreml" && Sys.info()[["sysname"]] != "Darwin") {
         warning("CoreML is only available on macOS, falling back to CPU")
-        provider <- "cpu"
+        backend <- "cpu"
     }
     cache <- if (!is.null(cache_dir)) {
         normalizePath(cache_dir, mustWork = FALSE)
@@ -54,7 +58,7 @@ onnx_model <- function(
     model_path <- normalizePath(path)
 
     # Detect external data files (.onnx_data) alongside the model.
-    # These are pre-loaded into memory so that non-CPU providers
+    # These are pre-loaded into memory so that non-CPU backends
     # (especially CoreML) can access them without resolving relative paths.
     model_dir <- dirname(model_path)
     external_data <- list.files(model_dir, pattern = "[.]onnx_data$", full.names = TRUE)
@@ -63,7 +67,7 @@ onnx_model <- function(
     sess <- onnx_create_session(
         env_ptr = env,
         model_path = model_path,
-        provider = provider,
+        provider = backend,
         cache_dir = cache,
         threads = as.integer(threads),
         opt_level = as.integer(opt_level),
@@ -82,7 +86,7 @@ onnx_model <- function(
             ptr = sess,
             env = env,
             path = path,
-            provider = provider,
+            backend = backend,
             threads = as.integer(threads),
             opt_level = as.integer(opt_level),
             input_names = input_names,
@@ -134,7 +138,7 @@ onnx_model <- function(
 print.onnx_model <- function(x, ...) {
     cat("onnxr model\n")
     cat("  model:  ", x$path, "\n")
-    cat("  provider:", x$provider, " threads:", ifelse(x$threads == 0, "auto", x$threads), "\n")
+    cat("  backend:", x$backend, " threads:", ifelse(x$threads == 0, "auto", x$threads), "\n")
     for (i in seq_len(x$n_inputs)) {
         cat(sprintf(
             "  input:  %s %s <%s>\n",

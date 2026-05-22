@@ -2,7 +2,7 @@
 % Please edit documentation in R/run.R
 \name{onnx_run}
 \alias{onnx_run}
-\title{Run inference on an ONNX model}
+\title{Run or predict from an ONNX model}
 \usage{
 onnx_run(model, ..., simplify = FALSE)
 }
@@ -30,7 +30,8 @@ with multiple outputs, returns a named list of arrays.
 \details{
 Handles conversion between R's column-major arrays and ONNX's
 row-major tensors, and between R's numeric types and the model's
-declared element types (float, double, int32, int64).
+declared element types (float, double, int32, int64). Note that int64 outputs
+are cast to doubles, which may lose precision for large integers.
 }
 \examples{
 \donttest{

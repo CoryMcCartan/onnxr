@@ -18,7 +18,7 @@ To demonstrate the package in a more realistic setting, we'll show how to run an
 First, we'll download the YOLO26 (You Only Look Once) pretrained model from the Ultralytics repository.
 
 ```{r download}
-model_url = "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n-pose.onnx"
+model_url = "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n.onnx"
 model_path = file.path(tempdir(), "yolo26n.onnx")
 download.file(model_url, model_path, mode = "wb")
 ```
