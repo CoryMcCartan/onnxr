@@ -52,9 +52,9 @@ model <- onnx_model(model_path)
 ```
 
 By default, the model will run on the CPU. Other backends are available
-with the `provider` argument to `onnx_model()`. For example, setting
-`onnx_model(model_path, provider = "coreml")` would load the model to
-run via Apple’s CoreML library on Apple Silicon devices.
+with the `backend` argument to `onnx_model()`. For example, setting
+`onnx_model(model_path, backend = "coreml")` would load the model to run
+via Apple’s CoreML library on Apple Silicon devices.
 
 Printing the model object shows information on the input and output
 arrays.
@@ -62,7 +62,7 @@ arrays.
 ``` r
 model
 #> onnxr model
-#>   model:   /private/var/folders/64/lv8c__115kj6hxqc1f9sq5zr0000gn/T/Rtmp8PRFoT/temp_libpath7a59105d9304/onnxr/extdata/glm_iris.onnx 
+#>   model:   /private/var/folders/64/lv8c__115kj6hxqc1f9sq5zr0000gn/T/Rtmp8PRFoT/temp_libpath7a5966e22f64/onnxr/extdata/glm_iris.onnx 
 #>   backend: cpu  threads: 1 
 #>   input:  X [?, 4] <float>
 #>   output: label [?] <int64>
