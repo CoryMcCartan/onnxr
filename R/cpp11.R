@@ -24,8 +24,8 @@ onnx_create_env <- function() {
   .Call(`_onnxr_onnx_create_env`)
 }
 
-onnx_create_session <- function(env_ptr, model_path, provider, cache_dir, threads, opt_level, external_data_files) {
-  .Call(`_onnxr_onnx_create_session`, env_ptr, model_path, provider, cache_dir, threads, opt_level, external_data_files)
+onnx_create_session <- function(env_ptr, model_path, provider, cache_dir, threads, opt_level) {
+  .Call(`_onnxr_onnx_create_session`, env_ptr, model_path, provider, cache_dir, threads, opt_level)
 }
 
 onnx_session_input_count <- function(session_ptr) {
@@ -54,6 +54,10 @@ onnx_session_output_shapes <- function(session_ptr) {
 
 onnx_session_input_types <- function(session_ptr) {
   .Call(`_onnxr_onnx_session_input_types`, session_ptr)
+}
+
+onnx_session_input_optional <- function(session_ptr) {
+  .Call(`_onnxr_onnx_session_input_optional`, session_ptr)
 }
 
 onnx_session_output_types <- function(session_ptr) {

@@ -158,5 +158,5 @@ test_that("wrong number of inputs errors", {
     input_mat <- matrix(1:6, nrow = 2, ncol = 3)
 
     # Too many positional inputs for a single-input model
-    expect_error(onnx_run(sess, input_mat, input_mat), "1 input.*but 2 provided")
+    expect_error(onnx_run(sess, input_mat, input_mat), "but 2 provided")
 })

@@ -1,3 +1,9 @@
+# onnxr 0.1.0.9000
+
+- Improved handling of external data files
+- Added support for true/false (boolean) tensors as both inputs and outputs
+- Better parsing and display of models with optional inputs
+
 # onnxr 0.1.0
 
 Initial package release. Features:

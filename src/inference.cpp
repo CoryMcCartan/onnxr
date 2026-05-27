@@ -97,6 +97,17 @@ static bool has_int_na(SEXP x) {
     return false;
 }
 
+// Check whether an R logical vector contains any NA values
+// (LGLSXP stores values as int, with NA_LOGICAL == NA_INTEGER)
+static bool has_lgl_na(SEXP x) {
+    int* p = LOGICAL(x);
+    R_xlen_t len = Rf_xlength(x);
+    for (R_xlen_t i = 0; i < len; i++) {
+        if (p[i] == NA_LOGICAL) return true;
+    }
+    return false;
+}
+
 // ---- Input tensor creation ----
 // Create an ORT input tensor from an R vector, dispatching on input_type.
 // Manages its own buffer lifetime via the out_buf pointer.
@@ -105,7 +116,8 @@ static Ort::Value make_input_tensor(
     SEXP input_data, const std::vector<int64_t>& shape,
     int input_type, Ort::MemoryInfo& memory_info,
     std::vector<float>& buf_f, std::vector<double>& buf_d,
-    std::vector<int32_t>& buf_i32, std::vector<int64_t>& buf_i64
+    std::vector<int32_t>& buf_i32, std::vector<int64_t>& buf_i64,
+    std::vector<uint8_t>& buf_b
 ) {
     size_t n = 1;
     for (auto d : shape) n *= d;
@@ -117,8 +129,11 @@ static Ort::Value make_input_tensor(
                      static_cast<int>(input_len), static_cast<int>(n));
     }
 
-    // Check for NAs in integer input
+    // Check for NAs in integer/logical input
     if (TYPEOF(input_data) == INTSXP && has_int_na(input_data)) {
+        cpp11::stop("NA values are not supported in ONNX model inputs.");
+    }
+    if (TYPEOF(input_data) == LGLSXP && has_lgl_na(input_data)) {
         cpp11::stop("NA values are not supported in ONNX model inputs.");
     }
 
@@ -171,9 +186,23 @@ static Ort::Value make_input_tensor(
             return Ort::Value::CreateTensor<int64_t>(
                 memory_info, buf_i64.data(), n, shape.data(), shape.size());
         }
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL: {
+            buf_b.resize(n);
+            if (TYPEOF(input_data) == LGLSXP) {
+                permute_colrow(LOGICAL(input_data), buf_b.data(), shape);
+            } else if (TYPEOF(input_data) == INTSXP) {
+                permute_colrow(INTEGER(input_data), buf_b.data(), shape);
+            } else {
+                cpp11::stop("Input must be logical or integer.");
+            }
+            return Ort::Value::CreateTensor(
+                memory_info, buf_b.data(), n,
+                shape.data(), shape.size(),
+                ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL);
+        }
         default:
             cpp11::stop("Unsupported input tensor type (code %d). "
-                        "Supported: float, double, int32, int64.", input_type);
+                        "Supported: float, double, int32, int64, bool.", input_type);
     }
 }
 
@@ -216,9 +245,16 @@ static SEXP read_output_tensor(Ort::Value& tensor) {
             set_dim_attr(result, shape);
             return result;
         }
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL: {
+            uint8_t* data = tensor.GetTensorMutableData<uint8_t>();
+            cpp11::writable::logicals result(n);
+            permute_rowcol(data, LOGICAL(result), shape);
+            set_dim_attr(result, shape);
+            return result;
+        }
         default:
             cpp11::stop("Unsupported output tensor type (code %d). "
-                        "Supported: float, double, int32, int64.",
+                        "Supported: float, double, int32, int64, bool.",
                         static_cast<int>(etype));
     }
 }
@@ -249,6 +285,7 @@ cpp11::writable::list onnx_run_(
     std::vector<std::vector<double>> bufs_d(n_inputs);
     std::vector<std::vector<int32_t>> bufs_i32(n_inputs);
     std::vector<std::vector<int64_t>> bufs_i64(n_inputs);
+    std::vector<std::vector<uint8_t>> bufs_b(n_inputs);
 
     std::vector<Ort::Value> input_tensors;
     input_tensors.reserve(n_inputs);
@@ -268,7 +305,7 @@ cpp11::writable::list onnx_run_(
         input_tensors.push_back(
             make_input_tensor(input_data, shape64, input_types[i],
                               memory_info, bufs_f[i], bufs_d[i],
-                              bufs_i32[i], bufs_i64[i]));
+                              bufs_i32[i], bufs_i64[i], bufs_b[i]));
     }
 
     // Build output names

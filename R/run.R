@@ -6,7 +6,7 @@
 #'
 #' Handles conversion between R's column-major arrays and ONNX's
 #' row-major tensors, and between R's numeric types and the model's
-#' declared element types (float, double, int32, int64). Note that int64 outputs
+#' declared element types (float, double, int32, int64, bool). Note that int64 outputs
 #' are cast to doubles, which may lose precision for large integers.
 #'
 #' @param model An `"onnx_model"` object created by [onnx_model()].
@@ -51,21 +51,39 @@ onnx_run <- function(model, ..., simplify = FALSE) {
         }
         input_list <- args
     } else {
-        # Positional
-        if (length(args) != model$n_inputs) {
-            stop("Model has ", model$n_inputs, " input(s) but ", length(args), " provided.")
+        # Positional. Allow trailing optional inputs to be omitted.
+        n_required <- sum(!model$input_optional)
+        if (length(args) < n_required || length(args) > model$n_inputs) {
+            stop(
+                "Model has ", n_required, " required input(s)",
+                if (model$n_inputs > n_required) {
+                    paste0(" and ", model$n_inputs - n_required, " optional")
+                } else "",
+                " but ", length(args), " provided."
+            )
         }
         input_list <- args
-        input_order <- seq_len(model$n_inputs)
+        input_order <- seq_len(length(args))
+    }
+
+    # Check that all required inputs are present (named or positional)
+    required <- which(!model$input_optional)
+    missing_required <- setdiff(required, input_order)
+    if (length(missing_required) > 0L) {
+        stop(
+            "Missing required input(s): ",
+            paste(model$input_names[missing_required], collapse = ", "), "."
+        )
     }
 
     # Validate each input's type and dimensions
     for (j in seq_along(input_list)) {
         i <- input_order[j]
-        if (!is.numeric(input_list[[j]]) && !is.integer(input_list[[j]])) {
+        if (!is.numeric(input_list[[j]]) && !is.integer(input_list[[j]]) &&
+            !is.logical(input_list[[j]])) {
             # fmt: skip
             stop(
-                "Input '", model$input_names[i], "' must be numeric or integer, ", 
+                "Input '", model$input_names[i], "' must be numeric, integer, or logical, ",
                 "not ", typeof(input_list[[j]]), "."
             )
         }

@@ -57,12 +57,6 @@ onnx_model <- function(
 
     model_path <- normalizePath(path)
 
-    # Detect external data files (.onnx_data) alongside the model.
-    # These are pre-loaded into memory so that non-CPU backends
-    # (especially CoreML) can access them without resolving relative paths.
-    model_dir <- dirname(model_path)
-    external_data <- list.files(model_dir, pattern = "[.]onnx_data$", full.names = TRUE)
-
     env <- onnx_create_env()
     sess <- onnx_create_session(
         env_ptr = env,
@@ -70,8 +64,7 @@ onnx_model <- function(
         provider = backend,
         cache_dir = cache,
         threads = as.integer(threads),
-        opt_level = as.integer(opt_level),
-        external_data_files = external_data
+        opt_level = as.integer(opt_level)
     )
 
     input_shapes <- onnx_session_input_shapes(sess)
@@ -96,7 +89,8 @@ onnx_model <- function(
             input_shapes = input_shapes,
             output_shapes = output_shapes,
             input_types = onnx_session_input_types(sess),
-            output_types = onnx_session_output_types(sess)
+            output_types = onnx_session_output_types(sess),
+            input_optional = onnx_session_input_optional(sess)
         ),
         class = "onnx_model"
     )
@@ -141,10 +135,11 @@ print.onnx_model <- function(x, ...) {
     cat("  backend:", x$backend, " threads:", ifelse(x$threads == 0, "auto", x$threads), "\n")
     for (i in seq_len(x$n_inputs)) {
         cat(sprintf(
-            "  input:  %s %s <%s>\n",
+            "  input:  %s %s <%s>%s\n",
             x$input_names[i],
             .fmt_shape(x$input_shapes[[i]]),
-            .onnx_type_name(x$input_types[i])
+            .onnx_type_name(x$input_types[i]),
+            if (isTRUE(x$input_optional[i])) " (optional)" else ""
         ))
     }
     for (i in seq_len(x$n_outputs)) {
