@@ -105,9 +105,9 @@ onnx_find_lib <- function() {
 #' @returns Invisibly, the path to the installation directory.
 #' @export
 #'
-#' @examples \dontrun{
+#' @examples \donttest{
+#' # Downloads files, which can take time depending on internet speed
 #' onnx_install()
-#' onnx_install(cuda = TRUE)
 #' }
 onnx_install <- function(cuda = NULL) {
     if (onnx_is_installed()) {

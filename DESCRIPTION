@@ -1,7 +1,7 @@
 Package: onnxr
 Type: Package
-Title: R Bindings to 'ONNX' Runtime
-Version: 0.1.0
+Title: Bindings to 'ONNX' Runtime
+Version: 0.1.1
 Authors@R: c(
     person("Cory", "McCartan", email = "mccartan@psu.edu", role = c("aut", "cre", "cph")),
     person("Caleb", "Carr", email = "calebmcarr1@gmail.com", role = "cph", 
@@ -9,11 +9,11 @@ Authors@R: c(
     person("Microsoft Corporation", role = "cph", 
         comment = "Copyright holder of src/onnxruntime headers")
   )
-Description: Provides native R access to the 'Open Neural Network Exchange' (ONNX) 
+Description: Provides native access to the 'Open Neural Network Exchange' (ONNX) 
     Runtime <https://onnxruntime.ai/>, which is a performant engine for running
     machine learning models that are saved to a standardized format. Rather than
-    interfacing with 'ONNX' via Python, as in the official 'onnx' package, this
-    package directly interfaces with the runtime's C++ API via 'cpp11'. Models
+    interfacing with 'ONNX' via 'Python', as in the official 'onnx' package, 
+    'onnxr' directly interfaces with the runtime's 'C++' API via 'cpp11'. Models
     saved to '.onnx' files can be loaded and run on various backends, including
     CPUs and Apple's 'CoreML' library.
 License: MIT + file LICENSE

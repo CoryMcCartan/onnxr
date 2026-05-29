@@ -27,8 +27,8 @@ and installs them to a per-user data directory. The library is loaded
 immediately after installation, so there is no need to restart R.
 }
 \examples{
-\dontrun{
+\donttest{
+# Downloads files, which can take time depending on internet speed
 onnx_install()
-onnx_install(cuda = TRUE)
 }
 }

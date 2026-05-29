@@ -66,10 +66,11 @@ img[1, 1:3, 21:620, 53:587] = aperm(raw, c(3, 1, 2))
 
 # helper to plot image
 plot.image <- function(x) {
-    par(mar = c(0, 0, 0, 0))
+    old_par = par(mar = c(0, 0, 0, 0))
     x = aperm(x[1,,,], c(2, 3, 1))
     plot(0:1, 0:1, type = "n", axes = FALSE, asp = nrow(x) / ncol(x))
     rasterImage(x, 0, 0, 1, 1)
+    par(old_par)
 }
 plot.image(img)
 ```

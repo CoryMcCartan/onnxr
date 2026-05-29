@@ -31,6 +31,9 @@
 #' }
 #' }
 onnx_run <- function(model, ..., simplify = FALSE) {
+    if (!inherits(model, "onnx_model")) {
+        stop("`model` must be an `onnx_model` object created by `onnx_model()`.")
+    }
     args <- list(...)
 
     # Match inputs to model input names
