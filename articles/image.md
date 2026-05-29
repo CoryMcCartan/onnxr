@@ -20,7 +20,7 @@ library(onnxr)
 model = onnx_model(model_path)
 print(model)
 #> onnxr model
-#>   model:   /tmp/Rtmpch2aRz/yolo26n.onnx 
+#>   model:   /tmp/Rtmp6fg0gb/yolo26n.onnx 
 #>   backend: cpu  threads: 1 
 #>   input:  images [1, 3, 640, 640] <float>
 #>   output: output0 [1, 300, 6] <float>
@@ -68,15 +68,11 @@ img[1, 1:3, 21:620, 53:587] = aperm(raw, c(3, 1, 2))
 
 # helper to plot image
 plot.image <- function(x) {
-    par(mar = c(0, 0, 0, 0))
-    rev_y = rev(1:dim(x)[3])
-    x = 0.299 * x[1, 1, , ] + 0.587 * x[1, 2, , ] + 0.114 * x[1, 3, , ]
-    image(
-        t(x[rev_y, ]),
-        col = gray.colors(256, start = 0, end = 1),
-        asp = nrow(x) / ncol(x),
-        axes = FALSE
-    )
+    old_par = par(mar = c(0, 0, 0, 0))
+    x = aperm(x[1,,,], c(2, 3, 1))
+    plot(0:1, 0:1, type = "n", axes = FALSE, asp = nrow(x) / ncol(x))
+    rasterImage(x, 0, 0, 1, 1)
+    par(old_par)
 }
 plot.image(img)
 ```
@@ -111,15 +107,22 @@ a certain threshold and plot them on top of the image.
 ``` r
 
 plot.image(img)
-idx_conf = which(res[1, , 5] >= 0.2)
+idx_conf = which(res[1, , 5] >= 0.2) # minimum 20% confidence
 for (j in idx_conf) {
+    # map bounding box to plot coordinates
     x1 = res[1, j, 1] / 640
     y1 = 1 - res[1, j, 2] / 640
     x2 = res[1, j, 3] / 640
     y2 = 1 - res[1, j, 4] / 640
-    rect(x1, y1, x2, y2, border = "#e00", lwd = 1)
+    # plot boxes and labels
+    bg = "#f0f0ff"
+    pad = 0.005
+    rect(x1, y1, x2, y2, border = bg, lwd = 1)
     lbl = paste0(types[res[1, j, 6] + 1], " (", round(res[1, j, 5] * 100), "%)")
-    text(x1, y1, lbl, adj = c(0, -0.5), cex = 0.8, col = "#800", font = 2)
+    sw = strwidth(lbl, cex = 0.8, font = 2)
+    sh = strheight(lbl, cex = 0.8, font = 2)
+    rect(x1, y1, x1 + sw + 2*pad, y1 + sh + 2*pad, col = paste0(bg, "a0"), border = bg)
+    text(x1 + pad, y1 + pad, lbl, adj = c(0, -0.05), cex = 0.8, col = "#000", font = 2)
 }
 ```
 

@@ -39,8 +39,8 @@ has a single output) the output array directly.
 
 Handles conversion between R's column-major arrays and ONNX's row-major
 tensors, and between R's numeric types and the model's declared element
-types (float, double, int32, int64). Note that int64 outputs are cast to
-doubles, which may lose precision for large integers.
+types (float, double, int32, int64, bool). Note that int64 outputs are
+cast to doubles, which may lose precision for large integers.
 
 ## Examples
 

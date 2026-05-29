@@ -2,7 +2,7 @@
 
 ## Authors
 
-- **Cory McCartan**. Author, maintainer.
+- **Cory McCartan**. Author, maintainer, copyright holder.
 
 - **Caleb Carr**. Copyright holder.  
   Author of 'nativeORT' package that is the basis for this package
@@ -15,13 +15,13 @@
 Source:
 [`DESCRIPTION`](https://github.com/CoryMcCartan/onnxr/blob/main/DESCRIPTION)
 
-McCartan C (2026). *onnxr: R Bindings to 'ONNX' Runtime*. R package
-version 0.1.0, <https://corymccartan.com/onnxr>.
+McCartan C (2026). *onnxr: Bindings to 'ONNX' Runtime*. R package
+version 0.1.1, <https://corymccartan.com/onnxr/>.
 
     @Manual{,
-      title = {onnxr: R Bindings to 'ONNX' Runtime},
+      title = {onnxr: Bindings to 'ONNX' Runtime},
       author = {Cory McCartan},
       year = {2026},
-      note = {R package version 0.1.0},
-      url = {https://corymccartan.com/onnxr},
+      note = {R package version 0.1.1},
+      url = {https://corymccartan.com/onnxr/},
     }

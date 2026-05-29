@@ -31,7 +31,7 @@ onnx_model(
 
   - `"cuda"` — NVIDIA GPU (Linux x64 and Windows x64 only). Requires
     CUDA toolkit and the CUDA-enabled ORT build from
-    [onnx_install](http://corymccartan.com/onnxr/reference/onnx_install.md)`(cuda = TRUE)`.
+    `onnx_install(cuda = TRUE)`.
 
   - `"xnnpack"` — Optimized CPU kernels (mobile/embedded). Requires an
     ORT build with XNNPACK support (not provided by

@@ -33,8 +33,9 @@ Invisibly, the path to the installation directory.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
+# Downloads files, which can take time depending on internet speed
 onnx_install()
-onnx_install(cuda = TRUE)
-} # }
+#> onnxruntime 1.25.1 is already installed.
+# }
 ```

@@ -14,8 +14,16 @@ including CPUs and Apple’s CoreML library.
 
 ## Installation
 
-You can install the development version of **onnxr** from
-[GitHub](https://github.com/) with:
+You can install **onnxr** from
+[CRAN](https://cran.r-project.org/package=onnxr) with:
+
+``` r
+
+install.packages("onnxr")
+```
+
+Or install the development version from [GitHub](https://github.com/)
+with:
 
 ``` r
 
@@ -61,7 +69,7 @@ arrays.
 
 model
 #> onnxr model
-#>   model:   /private/var/folders/64/lv8c__115kj6hxqc1f9sq5zr0000gn/T/Rtmp8PRFoT/temp_libpath7a5966e22f64/onnxr/extdata/glm_iris.onnx 
+#>   model:   /private/var/folders/64/lv8c__115kj6hxqc1f9sq5zr0000gn/T/Rtmpacscxg/temp_libpath8f8e2fc81c86/onnxr/extdata/glm_iris.onnx 
 #>   backend: cpu  threads: 1 
 #>   input:  X [?, 4] <float>
 #>   output: label [?] <int64>

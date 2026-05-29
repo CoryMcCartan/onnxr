@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>R Bindings to ONNX Runtime • onnxr</title>
+<title>Bindings to ONNX Runtime • onnxr</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="R Bindings to ONNX Runtime">
-<meta name="description" content="Provides native R access to the Open Neural Network Exchange (ONNX) Runtime &lt;https://onnxruntime.ai/&gt;, which is a performant engine for running machine learning models that are saved to a standardized format. Rather than interfacing with ONNX via Python, as in the official onnx package, this package directly interfaces with the runtimes C++ API via cpp11. Models saved to .onnx files can be loaded and run on various backends, including CPUs and Apples CoreML library.">
-<meta property="og:description" content="Provides native R access to the Open Neural Network Exchange (ONNX) Runtime &lt;https://onnxruntime.ai/&gt;, which is a performant engine for running machine learning models that are saved to a standardized format. Rather than interfacing with ONNX via Python, as in the official onnx package, this package directly interfaces with the runtimes C++ API via cpp11. Models saved to .onnx files can be loaded and run on various backends, including CPUs and Apples CoreML library.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Bindings to ONNX Runtime">
+<meta name="description" content="Provides native access to the Open Neural Network Exchange (ONNX) Runtime &lt;https://onnxruntime.ai/&gt;, which is a performant engine for running machine learning models that are saved to a standardized format. Rather than interfacing with ONNX via Python, as in the official onnx package, onnxr directly interfaces with the runtimes C++ API via cpp11. Models saved to .onnx files can be loaded and run on various backends, including CPUs and Apples CoreML library.">
+<meta property="og:description" content="Provides native access to the Open Neural Network Exchange (ONNX) Runtime &lt;https://onnxruntime.ai/&gt;, which is a performant engine for running machine learning models that are saved to a standardized format. Rather than interfacing with ONNX via Python, as in the official onnx package, onnxr directly interfaces with the runtimes C++ API via cpp11. Models saved to .onnx files can be loaded and run on various backends, including CPUs and Apples CoreML library.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">onnxr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,8 +62,11 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of <strong>onnxr</strong> from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<p>You can install <strong>onnxr</strong> from <a href="https://cran.r-project.org/package=onnxr" class="external-link">CRAN</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"onnxr"</span><span class="op">)</span></span></code></pre></div>
+<p>Or install the development version from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"CoryMcCartan/onnxr"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -71,26 +74,26 @@
 <h2 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
 </h2>
 <p>On first load of the package, you will need to call <code><a href="reference/onnx_install.html">onnx_install()</a></code> if <code>libonnxruntime</code> is not already installed on your system. This will download and install the latest version of the ONNX Runtime library, which is roughly 35 MB.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">onnxr</span><span class="fu">::</span><span class="fu"><a href="reference/onnx_install.html">onnx_install</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The package comes with an example <code>.onnx</code> GLM model for predicting <em>versicolor</em> vs <em>virginica</em> in the <code>iris</code> data.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://corymccartan.com/onnxr" class="external-link">onnxr</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://corymccartan.com/onnxr/" class="external-link">onnxr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">model_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"glm_iris.onnx"</span>, package <span class="op">=</span> <span class="st">"onnxr"</span><span class="op">)</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/onnx_model.html">onnx_model</a></span><span class="op">(</span><span class="va">model_path</span><span class="op">)</span></span></code></pre></div>
 <p>By default, the model will run on the CPU. Other backends are available with the <code>backend</code> argument to <code><a href="reference/onnx_model.html">onnx_model()</a></code>. For example, setting <code>onnx_model(model_path, backend = "coreml")</code> would load the model to run via Apple’s CoreML library on Apple Silicon devices.</p>
 <p>Printing the model object shows information on the input and output arrays.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span></span>
 <span><span class="co">#&gt; onnxr model</span></span>
-<span><span class="co">#&gt;   model:   /private/var/folders/64/lv8c__115kj6hxqc1f9sq5zr0000gn/T/Rtmp8PRFoT/temp_libpath7a5966e22f64/onnxr/extdata/glm_iris.onnx </span></span>
+<span><span class="co">#&gt;   model:   /private/var/folders/64/lv8c__115kj6hxqc1f9sq5zr0000gn/T/Rtmpacscxg/temp_libpath8f8e2fc81c86/onnxr/extdata/glm_iris.onnx </span></span>
 <span><span class="co">#&gt;   backend: cpu  threads: 1 </span></span>
 <span><span class="co">#&gt;   input:  X [?, 4] &lt;float&gt;</span></span>
 <span><span class="co">#&gt;   output: label [?] &lt;int64&gt;</span></span>
 <span><span class="co">#&gt;   output: probabilities [?, 2] &lt;float&gt;</span></span></code></pre></div>
 <p>The model can be called by using <code><a href="reference/onnx_run.html">onnx_run()</a></code>, which accepts named or positional arguments matching the model’s inputs.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span><span class="op">)</span></span>
 <span><span class="va">output</span> <span class="op">=</span> <span class="fu"><a href="reference/onnx_run.html">onnx_run</a></span><span class="op">(</span><span class="va">model</span>, X <span class="op">=</span> <span class="va">X</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">output</span><span class="op">)</span></span>
@@ -132,7 +135,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Cory McCartan <br><small class="roles"> Author, maintainer </small>   </li>
+<li>Cory McCartan <br><small class="roles"> Author, maintainer, copyright holder </small>   </li>
 <li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>
