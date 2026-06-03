@@ -1,4 +1,4 @@
-# onnxr 0.1.1
+# onnxr 0.1.2
 
 - Improved handling of external data files
 - Added support for boolean tensors as both inputs and outputs

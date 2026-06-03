@@ -1,7 +1,7 @@
 Package: onnxr
 Type: Package
 Title: Bindings to 'ONNX' Runtime
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(
     person("Cory", "McCartan", email = "mccartan@psu.edu", role = c("aut", "cre", "cph")),
     person("Caleb", "Carr", email = "calebmcarr1@gmail.com", role = "cph", 

@@ -104,11 +104,6 @@ onnx_find_lib <- function() {
 #'
 #' @returns Invisibly, the path to the installation directory.
 #' @export
-#'
-#' @examples \donttest{
-#' # Downloads files, which can take time depending on internet speed
-#' onnx_install()
-#' }
 onnx_install <- function(cuda = NULL) {
     if (onnx_is_installed()) {
         message("onnxruntime ", .onnx_version, " is already installed.")
@@ -123,8 +118,7 @@ onnx_install <- function(cuda = NULL) {
     }
 
     if (cuda && !os %in% c("linux-x64", "win-x64")) {
-        stop("CUDA builds are only available for Linux x64 and Windows x64, ",
-             "not ", os)
+        stop("CUDA builds are only available for Linux x64 and Windows x64, ", "not ", os)
     }
 
     url <- onnx_binary_url(cuda = cuda)
@@ -147,9 +141,7 @@ onnx_install <- function(cuda = NULL) {
         onnx_codesign(file.path(dest, "lib"))
     }
 
-    message("onnxruntime ", .onnx_version,
-            if (cuda) " (CUDA)" else "",
-            " installed successfully.")
+    message("onnxruntime ", .onnx_version, if (cuda) " (CUDA)" else "", " installed successfully.")
     message("location: ", dest)
 
     # Load the library immediately so it's available without restarting R
@@ -225,7 +217,8 @@ onnx_codesign <- function(lib_dir) {
         ret <- system2(
             "codesign",
             c("--force", "--deep", "--sign", "-", shQuote(lib)),
-            stdout = TRUE, stderr = TRUE
+            stdout = TRUE,
+            stderr = TRUE
         )
         if (!is.null(attr(ret, "status"))) {
             warning("codesign failed for ", basename(lib), ": ", paste(ret, collapse = "\n"))
