@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">onnxr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,7 +59,7 @@
       <h1>End-to-end example</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/CoryMcCartan/onnxr/blob/main/vignettes/image.Rmd" class="external-link"><code>vignettes/image.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/CoryMcCartan/onnxr/blob/v0.1.2/vignettes/image.Rmd" class="external-link"><code>vignettes/image.Rmd</code></a></small>
       <div class="d-none name"><code>image.Rmd</code></div>
     </div>
 
@@ -80,7 +80,7 @@ repository.</p>
 <span><span class="va">model</span> <span class="op">=</span> <span class="fu"><a href="../reference/onnx_model.html">onnx_model</a></span><span class="op">(</span><span class="va">model_path</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="co">#&gt; onnxr model</span></span>
-<span><span class="co">#&gt;   model:   /tmp/Rtmp6fg0gb/yolo26n.onnx </span></span>
+<span><span class="co">#&gt;   model:   /tmp/RtmpOOb9iw/yolo26n.onnx </span></span>
 <span><span class="co">#&gt;   backend: cpu  threads: 1 </span></span>
 <span><span class="co">#&gt;   input:  images [1, 3, 640, 640] &lt;float&gt;</span></span>
 <span><span class="co">#&gt;   output: output0 [1, 300, 6] &lt;float&gt;</span></span></code></pre></div>
@@ -138,12 +138,12 @@ expected.</p>
 <span><span class="co">#&gt; [1]   1 300   6</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">[</span><span class="fl">1</span>, ,<span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;           [,1]     [,2]     [,3]     [,4]      [,5] [,6]</span></span>
-<span><span class="co">#&gt; [1,] 206.97272 111.5892 453.8904 608.1549 0.9148499    0</span></span>
-<span><span class="co">#&gt; [2,] 196.10501 382.3441 282.6647 422.7614 0.3758150   45</span></span>
-<span><span class="co">#&gt; [3,] 206.14194 320.3298 271.9363 384.4835 0.3103587   45</span></span>
-<span><span class="co">#&gt; [4,]  50.28871 347.6488 372.1359 614.8617 0.2087034   60</span></span>
-<span><span class="co">#&gt; [5,]  51.58389 441.1353 372.0831 616.1539 0.1889582   60</span></span>
-<span><span class="co">#&gt; [6,]  85.18719 403.0411 227.1775 487.6426 0.1187026   45</span></span></code></pre></div>
+<span><span class="co">#&gt; [1,] 206.97269 111.5892 453.8904 608.1549 0.9148500    0</span></span>
+<span><span class="co">#&gt; [2,] 196.10501 382.3441 282.6647 422.7614 0.3758152   45</span></span>
+<span><span class="co">#&gt; [3,] 206.14194 320.3298 271.9363 384.4835 0.3103585   45</span></span>
+<span><span class="co">#&gt; [4,]  50.28871 347.6487 372.1358 614.8617 0.2087032   60</span></span>
+<span><span class="co">#&gt; [5,]  51.58389 441.1353 372.0832 616.1539 0.1889582   60</span></span>
+<span><span class="co">#&gt; [6,]  85.18721 403.0411 227.1776 487.6426 0.1187024   45</span></span></code></pre></div>
 <p>Finally, we can pull out the bounding boxes with confidence scores
 above a certain threshold and plot them on top of the image.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">

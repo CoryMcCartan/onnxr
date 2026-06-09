@@ -69,7 +69,7 @@ arrays.
 
 model
 #> onnxr model
-#>   model:   /private/var/folders/64/lv8c__115kj6hxqc1f9sq5zr0000gn/T/Rtmpacscxg/temp_libpath8f8e2fc81c86/onnxr/extdata/glm_iris.onnx 
+#>   model:   /private/var/folders/64/lv8c__115kj6hxqc1f9sq5zr0000gn/T/Rtmpv4p53r/temp_libpathf5ec3803fffd/onnxr/extdata/glm_iris.onnx 
 #>   backend: cpu  threads: 1 
 #>   input:  X [?, 4] <float>
 #>   output: label [?] <int64>

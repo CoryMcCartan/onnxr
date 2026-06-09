@@ -29,13 +29,3 @@ onnx_install(cuda = NULL)
 ## Value
 
 Invisibly, the path to the installation directory.
-
-## Examples
-
-``` r
-# \donttest{
-# Downloads files, which can take time depending on internet speed
-onnx_install()
-#> onnxruntime 1.25.1 is already installed.
-# }
-```
