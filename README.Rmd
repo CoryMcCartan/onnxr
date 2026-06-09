@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/CoryMcCartan/onnxr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CoryMcCartan/onnxr/actions/workflows/R-CMD-check.yaml)
+[![CRAN status](https://www.r-pkg.org/badges/version/onnxr)](https://CRAN.R-project.org/package=onnxr)
 <!-- badges: end -->
 
 The **onnxr** package provides native R access to the [Open Neural Network
